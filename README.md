@@ -1,1 +1,1 @@
-# CrazyPythonNotes
+# CrazyPythonNotes Study Notes

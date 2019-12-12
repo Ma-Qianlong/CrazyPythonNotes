@@ -2,7 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bbfb6b90-1974-4ab7-a87d-7697a0ae86e5" name="Default Changelist" comment="">
+<<<<<<< HEAD
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+=======
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/CrazyPythonNotes.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CrazyPythonNotes.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+>>>>>>> ttttt
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -40,11 +47,20 @@
           </provider>
         </entry>
       </file>
+<<<<<<< HEAD
       <file pinned="false" current-in-tab="false">
+=======
+      <file pinned="false" current-in-tab="true">
+>>>>>>> ttttt
         <entry file="file://$PROJECT_DIR$/02/2.3/hex_test.py">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state relative-caret-position="647">
               <caret line="33" column="14" lean-forward="true" selection-start-line="33" selection-start-column="14" selection-end-line="33" selection-end-column="14" />
+=======
+            <state relative-caret-position="494">
+              <caret line="19" column="12" selection-start-line="19" selection-start-column="12" selection-end-line="19" selection-end-column="12" />
+>>>>>>> origin/master
             </state>
           </provider>
         </entry>
@@ -106,10 +122,25 @@
       </list>
     </option>
   </component>
+<<<<<<< HEAD
   <component name="ProjectFrameBounds">
     <option name="x" value="864" />
     <option name="width" value="1063" />
     <option name="height" value="1047" />
+=======
+<<<<<<< HEAD
+  <component name="ProjectFrameBounds" extendedState="7">
+    <option name="x" value="64" />
+    <option name="y" value="15" />
+    <option name="width" value="1400" />
+    <option name="height" value="1000" />
+=======
+  <component name="ProjectFrameBounds" extendedState="1">
+    <option name="x" value="888" />
+    <option name="width" value="1039" />
+    <option name="height" value="1047" />
+>>>>>>> ttttt
+>>>>>>> origin/master
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -127,6 +158,15 @@
               <item name="CrazyPythonNotes" type="b2602c69:ProjectViewProjectNode" />
               <item name="CrazyPythonNotes" type="462c0819:PsiDirectoryNode" />
               <item name="02" type="462c0819:PsiDirectoryNode" />
+<<<<<<< HEAD
+=======
+            </path>
+            <path>
+              <item name="CrazyPythonNotes" type="b2602c69:ProjectViewProjectNode" />
+              <item name="CrazyPythonNotes" type="462c0819:PsiDirectoryNode" />
+              <item name="02" type="462c0819:PsiDirectoryNode" />
+              <item name="2.3" type="462c0819:PsiDirectoryNode" />
+>>>>>>> ttttt
             </path>
           </expand>
           <select />
@@ -305,19 +345,43 @@
       <workItem from="1575554701298" duration="3906000" />
       <workItem from="1575814144905" duration="4152000" />
       <workItem from="1576072130681" duration="351000" />
+<<<<<<< HEAD
       <workItem from="1576074003309" duration="927000" />
       <workItem from="1576159410162" duration="3911000" />
+=======
+<<<<<<< HEAD
+      <workItem from="1576074003309" duration="433000" />
+=======
+      <workItem from="1576073813591" duration="390000" />
+>>>>>>> ttttt
+>>>>>>> origin/master
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
+<<<<<<< HEAD
     <option name="totallyTimeSpent" value="13247000" />
+=======
+<<<<<<< HEAD
+    <option name="totallyTimeSpent" value="8842000" />
+=======
+    <option name="totallyTimeSpent" value="8799000" />
+>>>>>>> ttttt
+>>>>>>> origin/master
   </component>
   <component name="ToolWindowManager">
     <frame x="864" y="0" width="1063" height="1047" extended-state="0" />
     <editor active="true" />
     <layout>
+<<<<<<< HEAD
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.47196737" />
+=======
+<<<<<<< HEAD
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.22330096" />
+=======
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20418006" />
+>>>>>>> ttttt
+>>>>>>> origin/master
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -382,6 +446,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/02/2.3/hex_test.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
         <state relative-caret-position="647">
           <caret line="33" column="14" lean-forward="true" selection-start-line="33" selection-start-column="14" selection-end-line="33" selection-end-column="14" />
         </state>
@@ -401,6 +466,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="156">
           <caret line="6" column="27" selection-start-line="6" selection-start-column="27" selection-end-line="6" selection-end-column="27" />
+=======
+        <state relative-caret-position="494">
+          <caret line="19" column="12" selection-start-line="19" selection-start-column="12" selection-end-line="19" selection-end-column="12" />
+>>>>>>> origin/master
         </state>
       </provider>
     </entry>

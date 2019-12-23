@@ -24,7 +24,7 @@ print(c_list)
 
 # tuple()函数可以将列表及区间等对象转换成元组
 print(end="\n\n")
-# 见列表转换成元组
+# 将列表转换成元组
 a_tuple = tuple(a_list)
 print(a_tuple)
 b_tuple = tuple(a_range)

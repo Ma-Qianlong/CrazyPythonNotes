@@ -1,0 +1,4 @@
+assert断言
+
+assert 断言的执行逻辑是：
+    if 条件为 False 程序引发 AssertionError 错误

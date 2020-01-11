@@ -7,7 +7,7 @@
 # @Time  : 2020/1/9 23:26
 # -*- *************** -*-
 
-import  random
+import random
 
 # 定义棋盘大小
 BOARD_SIZE = 15

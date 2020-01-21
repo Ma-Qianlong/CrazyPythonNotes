@@ -15,7 +15,7 @@
 # 并重写__new__（）方法 。
 # 下面程序定义了 一个 metaclass 类 。
 
-# 定义ItemMetaClass, 集成 type
+# 定义ItemMetaClass, 继承 type
 class ItemMetaClass(type):
     # cls 代表被动态修改的类
     # name 代表被动态修改的类名
@@ -44,7 +44,7 @@ class Book(metaclass=ItemMetaClass):
     def discount(self):
         return self._discount
 
-    @property.setter
+    @discount.setter
     def discount(self, discount):
         self._discount = discount
 
@@ -53,15 +53,14 @@ class Book(metaclass=ItemMetaClass):
 class CellPhone(metaclass=ItemMetaClass):
     __slots__ = ('price', '_discount')
 
-    def __init__(self, name, price):
-        self.name = name
+    def __init__(self, price):
         self.price = price
 
     @property
     def discount(self):
         return self._discount
 
-    @property.setter
+    @discount.setter
     def discount(self, discount):
         self._discount = discount
 
@@ -69,4 +68,17 @@ class CellPhone(metaclass=ItemMetaClass):
 # 因此，虽然在定义 Book 、CellPhone 类时没有定义 cal_price （）方法，
 # 但这两个类依然有 cal_price（）方法。
 # 如下程序测试了 Book 、CellPhone 两个类的 cal_price（）方法
+b = Book("疯狂Python讲义", 89)
+b.discount = 0.76
+# 调用Book对象的cal_price()方法
+print(b.cal_price())
 
+cp = CellPhone(2399)
+cp.discount = 0.85
+# 调用CellPhone对象的cal_price()方法
+print(cp.cal_price())
+
+# 通过使用 metaclass 可以动态修改程序中的一批类，对它们集中进行某种修改。
+
+# 这个功能在开发一些基础性框架时非常有用，程序可以通过使用 metaclass 为某一批需
+# 要具有通用功能的类添加方法。

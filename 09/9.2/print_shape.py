@@ -38,6 +38,5 @@ def test_print_triangle():
 
 if __name__ == '__main__': test_print_triangle()
 
-
 # ，把该模块文件拷贝到 lib\site”packages 路径下，
 # 就相当于为 Python 扩展了一个 print_shape 模块，这样任何 Python 程序都可使用该模块 。

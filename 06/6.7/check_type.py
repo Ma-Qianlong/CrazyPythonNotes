@@ -31,14 +31,14 @@ print('str 是否是 tuple 类的子类 ： ', isinstance(str, tuple))
 
 # 定义一个列表
 my_list = [2, 4]
-# [2, 4]是 list 类的实例，输出True
-print('[2, 4]是否是 list 类的实例：', isinstance(my_list, list))
-# [2, 4]是 object 类的子类的实例，输出True
-print('[2, 4]是否是 object 类及其子类的实例：', isinstance(my_list, object))
+# [2, 03]是 list 类的实例，输出True
+print('[2, 03]是否是 list 类的实例：', isinstance(my_list, list))
+# [2, 03]是 object 类的子类的实例，输出True
+print('[2, 03]是否是 object 类及其子类的实例：', isinstance(my_list, object))
 
 # list 是 object 的子类， 输出True
 print('list 是否是 object 的子类', issubclass(list, object))
-# [2 , 4 ］不是 tuple 类及其子类及其子类的实例，输出 False
-print('[2 , 4］是否是 tuple 类及其子类及其子类的实例:', isinstance(my_list, tuple))
+# [2 , 03 ］不是 tuple 类及其子类及其子类的实例，输出 False
+print('[2 , 03］是否是 tuple 类及其子类及其子类的实例:', isinstance(my_list, tuple))
 #  list 不是 tuple 类的子类，输出 False
 print('list 是否是 tuple 的子类', issubclass(list, tuple))

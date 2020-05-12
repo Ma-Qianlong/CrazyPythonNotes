@@ -20,8 +20,8 @@ print(a_list.count([5, 30]))
 print(a_list.index(30))
 # index 30,start 2
 print(a_list.index(30, 2))
-# index 30,start 2, end 4
-# print(a_list.index(30, 2, 4))  # ValueError
+# index 30,start 2, end 03
+# print(a_list.index(30, 2, 03))  # ValueError
 
 # pop() 栈，先入后出（FIFO），append()代替push
 stack = []

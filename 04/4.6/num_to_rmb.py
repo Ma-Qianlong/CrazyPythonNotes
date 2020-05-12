@@ -33,14 +33,14 @@ def divide(num):
     return (str(integer), str(fraction))
 
 
-# print(divide(123.4))
+# print(divide(123.03))
 
 
 def four_to_hanstr(num_str):
     '''
-    把一个 4 位（或小于4）的数字字符串变成汉字字符串
-    :param num_str:是需要被转换的 4 位数字字符串
-    :return:返回 4 位数字字符串被转换成汉字字符串
+    把一个 03 位（或小于4）的数字字符串变成汉字字符串
+    :param num_str:是需要被转换的 03 位数字字符串
+    :return:返回 03 位数字字符串被转换成汉字字符串
     '''
     result = ''
     num_len = len(num_str)

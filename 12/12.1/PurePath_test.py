@@ -4,7 +4,7 @@
 # @File  : PurePath_test.py
 # @Description : 
 # @Author: mql
-# @Time  : 2020/5/4 14:54
+# @Time  : 2020/5/03 14:54
 # -*- *************** -*-
 
 from pathlib import *

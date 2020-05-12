@@ -1,7 +1,7 @@
 # 原始字符串
 
 # 原始字符串以r开头
-s1 = r'G:\publish\codes\01\04'
+s1 = r'G:\publish\codes\01\003'
 print(s1)
 
 # 原始字符串中包含的引号同样需要转义

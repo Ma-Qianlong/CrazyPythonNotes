@@ -1,0 +1,53 @@
+简介：
+我们在写python程序的时候，很多时候都有bug，都是自己写的，自己造的孽，又的时候报错又是一堆，不知道是那部分出错了。
+
+我这初学者水平，就是打print，看哪部分执行了，哪部分没执行，由此来看问题大概在什么地方。
+
+其实python有更好的处理方案，logging模块。
+
+从Python2.3起,Python的标准库加入了logging模块.logging模块给运行中的应用提供了一个标准的信息输出接口.典型的logging机制实现是把要输出的数据简单地写到一个txt文件中去.写log文件的方式是一种常见的打log的方式,而logging模块提供的更多,它可以把输出信息输出到所有类文件的对象中去,甚至TCP和UDP的sockets,email服务器,Unix的syslog系统,NT系列的事件log系统,内存的buffer和HTTP服务器,当然还有”真正的”文件中去.
+
+Logging库被设计成模块的方式,它提供了以下几个子模块:loggers,handlers,filters和formatters.Loggers把应用需要直接调用的接口暴露出来.Handlers把log记录发到相应的目的地.Filters决定哪些记录需要发给handler.Formatters定义了log记录的输出格式.
+
+Logger对象扮演了三重角色.首先,它暴露给应用几个方法以便应用可以在运行时写log.其次,Logger对象按照log信息的严重程度或者根据filter对象来决定如何处理log信息(默认的过滤功能).最后,logger还负责把log信息传送给相关的loghandlers.
+
+Logger中最长使用的方法分成两部分中:configuration和message sending.
+
+用于Configuration的方法:
+
+    setLevel(level)
+    addFilter(filter)
+    removeFilter(filter)
+    addHandler(handler)
+    removeHandler(handler)
+
+
+setLevel()方法定义了一个logger处理的最底严重程度(比如说中/高/底三种,我定义为中,那么只有严重程度为中或者高的log才会被处理).debug级别是内置的最低级别,critical是最高级别.举例来说,如果严重级别设为info级,logger仅仅处理info,warning,error和critical级的log,而debug级别的则忽略掉.
+
+
+根据logger对象的设置,以下的方法被用来写log:
+
+    debug(log_message, [*args[, **kwargs]])
+    info(log_message, [*args[, **kwargs]])
+    warning(log_message, [*args[, **kwargs]])
+    error(log_message, [*args[, **kwargs]])
+    critical(log_message, [*args[, **kwargs]])
+    exception(message[, *args])
+    log(log_level, log_message, [*args[, **kwargs]])
+
+
+Handler对象负责分配合适的log信息(基于log信息的严重程度)到handler指定的目的地.Logger对象可以用addHandler()方法添加零个或多个handler对象到它自身.一个常见的场景是,一个应用可能希望把所有的log信息都发送到一个log文件中去,所有的error级别以上的log信息都发送到stdout,所有critical的log信息通过email发送.这个场景里要求三个不同handler处理,每个handler负责把特定的log信息发送到特定的地方.
+
+标准库里面包括以下的handlers:
+
+    StreamHandler       （流式，控制台模式？）
+    FileHandler          （文件式）
+    RotatingFileHandler    （自动覆盖文件）
+    TimedRotatingFileHandler  （按时间自动覆盖文件）
+    SocketHandler
+    DatagramHandler
+    SysLogHandler
+    NTEventLogHandler
+    SMTPHandler            （SMTP邮件处理）
+    MemoryHandler
+    HTTPHandler

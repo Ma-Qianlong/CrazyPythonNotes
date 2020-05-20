@@ -51,3 +51,101 @@ Handler对象负责分配合适的log信息(基于log信息的严重程度)到ha
     SMTPHandler            （SMTP邮件处理）
     MemoryHandler
     HTTPHandler
+
+
+
+
+ ############
+链接：https://www.jianshu.com/p/e96be02032f9
+
+3. 核心概念
+    1.Logger 记录器：暴露了应用程序代码能直接使用的接口。
+    2.Handler 处理器：将（记录器产生的）日志记录发送至合适的目的地。
+    3.Filter 过滤器：提供了更好的粒度控制，它可以决定输出哪些日志记录。
+    4.Formatter 格式化器：指明了最终输出中日志记录的布局。
+
+3.1 Logger 记录器
+Logger是一个树形层级结构，在使用接口debug，info，warn，error，critical之前必须创建Logger实例，即创建一个记录器，
+如果没有显式的进行创建，则默认创建一个root logger，并应用默认的日志级别(WARN)，处理器Handler(StreamHandler，即将日志信息打印输出在标准输出上)，和格式化器Formatter(默认的格式即为第一个简单使用程序中输出的格式)。
+    创建方法: logger = logging.getLogger(logger_name)
+创建Logger实例后，可以使用以下方法进行日志级别设置，增加处理器Handler。
+    logger.setLevel(logging.ERROR)  # 设置日志级别为ERROR，即只有日志级别大于等于ERROR的日志才会输出
+    logger.addHandler(handler_name)  # 为Logger实例增加一个处理器
+    logger.removeHandler(handler_name)   # 为Logger实例删除一个处理器
+
+
+3.2 Handler 处理器
+Handler处理器类型有很多种，比较常用的有三个，StreamHandler，FileHandler，NullHandler，
+详情可以访问 Python logging.handlers
+
+创建StreamHandler之后，可以通过使用以下方法设置日志级别，设置格式化器Formatter，增加或删除过滤器Filter。
+    ch.setLevel(logging.WARN)  # 指定日志级别，低于WARN级别的日志将被忽略
+    ch.setFormatter(formatter_name)  # 设置一个格式化器formatter
+    ch.addFilter(filter_name)  # 增加一个过滤器，可以增加多个
+    ch.removeFilter(filter_name)  # 删除一个过滤器
+
+3.2.1 StreamHandler
+1. logging模块中的三个handler之一。
+2. 能够将日志信息输出到sys.stdout, sys.stderr 或者类文件对象（更确切点，就是能够支持write()和flush()方法的对象）。
+构造参数：
+    class logging.StreamHandler(stream=None)
+    日志信息会输出到指定的stream中，如果stream为空则默认输出到sys.stderr
+
+3.2.2 FileHandler
+1. logging模块自带的三个handler之一。
+2. 继承自StreamHandler。将日志信息输出到磁盘文件上。
+构造参数：
+    class logging.FileHandler(filename, mode='a', encoding=None, delay=False)
+    模式默认为append，delay为true时，文件直到emit方法被执行才会打开。默认情况下，日志文件可以无限增大。
+
+3.2.3 NullHandler
+1. logging模块自带的三个handler之一。
+2. 空操作handler， 没有参数。
+
+3.2.4 WatchedFileHandler
+1. 位于logging.handlers模块中。
+2. 用于监视文件的状态，如果文件被改变了，那么就关闭当前流，重新打开文件，创建一个新的流。由于newsyslog或者logrotate的使用会导致文件改变。这个handler是专门为linux/unix系统设计的，因为在windows系统下，正在被打开的文件是不会被改变的。
+参数和FileHandler相同：
+    class logging.handlers.WatchedFileHandler(filename, mode='a', encoding=None, delay=False)
+
+3.2.5 RotatingFileHandler
+1. 位于logging.handlers支持循环日志文件。
+构造参数：
+    class logging.handlers.RotatingFileHandler(filename, mode='a', maxBytes=0, backupCount=0, encoding=None, delay=0)
+
+    参数maxBytes和backupCount允许日志文件在达到maxBytes时rollover.当文件大小达到或者超过maxBytes时，就会新创建一个日志文件。
+    上述的这两个参数任一一个为0时，rollover都不会发生。也就是就文件没有maxBytes限制。backupcount是备份数目，也就是最多能有多少个备份。
+    命名会在日志的base_name后面加上.0-.n的后缀，如example.log.1,example.log.1,…,example.log.10。当前使用的日志文件为base_name.log。
+3.2.6 TimedRotatingFileHandler
+定时循环日志handler，位于logging.handlers，支持定时生成新日志文件。
+
+构造参数：
+    class logging.handlers.TimedRotatingFileHandler(filename, when='h', interval=1, backupCount=0, encoding=None, delay=False, utc=False)
+
+    参数when决定了时间间隔的类型，参数interval决定了多少的时间间隔。如when='D'，interval=2，就是指两天的时间间隔，backupCount决定了能留几个日志文件。超过数量就会丢弃掉老的日志文件。
+
+    when的参数决定了时间间隔的类型。两者之间的关系如下：
+     'S'         |  秒
+     'M'         |  分
+     'H'         |  时
+     'D'         |  天
+     'W0'-'W6'   |  周一至周日
+     'midnight'  |  每天的凌晨
+      utc参数表示UTC时间。
+3.2.7 其他handler——SocketHandler、DatagramHandler、SysLogHandler、NtEventHandler、SMTPHandler、MemoryHandler、HTTPHandler
+这些handler都不怎么常用，所以具体介绍就请参考官方文档 (https://docs.python.org/3.7/library/logging.handlers.html)
+
+3.3 Formatter 格式化器
+使用Formatter对象设置日志信息最后的规则、结构和内容，默认的时间格式为%Y-%m-%d %H:%M:%S。
+
+    创建方法: formatter = logging.Formatter(fmt=None, datefmt=None, style='%')
+    fmt：消息的格式化字符串，如果不指明fmt，将使用'%(message)s'。
+    datefmt：日期字符串。如果不指明datefmt，将使用ISO8601日期格式。
+    style：引用样式，默认'%', 即'%()s'
+
+3.4 Filter 过滤器
+Handlers和Loggers可以使用Filters来完成比级别更复杂的过滤。Filter基类只允许特定Logger层次以下的事件。
+
+例如用'A.B'初始化的Filter允许Logger 'A.B', 'A.B.C', 'A.B.C.D', 'A.B.D'等记录的事件，logger'A.BB', 'B.A.B' 等就不行。如果用空字符串来初始化，所有的事件都接受。
+
+    创建方法: filter = logging.Filter(name='')

@@ -54,10 +54,10 @@ Windows 风格的路径。
     >> PurePath.with_suffix(suffix）： 将当前路径中的文件后缀名替换成新的后缀名 。 如果当前路径中没有后缀名，则会添加新的后缀名 。
 
 3. Path 的功能和用法
-    Path 是 PurePath 的子类 ，它 除支持 Pure Path 的 各种操作、属性和方法之外，还会真正访问底
+    Path 是 PurePath 的子类 ，它 除支持 PurePath 的 各种操作、属性和方法之外，还会真正访问底
 层的文件系统，包括判断 Path 对应的路径是否存在 ， 获取 Path 对应路径的各种属性（如：是否只读、
 是文件还是文件夹等） ， 甚至可以对文件进行读写。
-    Path 同样提供了两个子类 ： P os i xPath 和 WindowsPath ， 其中前者代表 UNIX 风格的路径：后
+    Path 同样提供了两个子类 ： PosixPath 和 WindowsPath ， 其中前者代表 UNIX 风格的路径：后
 者代表 Windows 风格的路径 。
     Path 对 象包含了大量 is_xxx（）方法，用于判断该 Path 对应的路径是否为 xxx 。 Path 包含 一个
 exists （）方法，用于判断该 Path 对应的目录是否存在。

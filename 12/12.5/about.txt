@@ -34,5 +34,52 @@ fileinput 还提供了如下全局函数来判断正在读取的文件信息 。
 ## 4 文件迭代器
     实际上，文件对象本身就是可遍历的（就像一个序列一样），因此，程序完全可以使用 for 循
 环来遍历文件内容。
+    for_file.py、 for_stdin.py
 
 ## 5 管道输入
+   从上面的示例看到，系统标准输入 sys.stdin 也是一个类文件对象 ，因此， Python 程序可以通
+过 sys.stdin 来读取键盘输入 。 但在某些时候，Python 程序希望读取的输入不是来自用户，而是来
+自某个命令，此时就需要使用管道输入了 。
+    管道的作用在于：将前一个命令的输出，当成下一个命令的输入。不管是 UNIX 系统（包括
+Mac OS X ）还是 Windows 系统，它们都支持管道输入 。管道输入的语法如下：
+    cmd1 | cmd2 | cmd3 ...
+    上面语法的作用是： cmd1 命令的输出，将会传给 cmd2 命令作为输入； cmd2 命令 的输入， 又
+会传给 cmd3 命令作为输出。
+    pipein_test.py
+
+## 6 使用 with 语句
+    在前面的程序中，我们都采用了程序主动关闭文件的方式 。 实际上， Python 提供了 with 语句来
+管理资源关闭。比如可以把打开的文件放在 with 语句中，这样 with i吾句就会帮我们自动关闭文件 。
+    with 语句的语法格式如下：
+    with context expression [as target(s)]:
+        with 代码块
+    在上面的语法格式中， context_expression 用于创建可自动关闭的资源。
+
+    那么，with 语句的实现原理是什么？其实很简单，使用 with 语句管理的资源必须是一个实现
+上下文管理协议（context manage protocol） 的类，这个类的对象可被称为上下文管理器 。 要实现上
+下文管理协议，必须实现如下两个方法 。
+    >> context_manager.__enter__()： 进入上下文管理器自动调用的方法。 该方法会在 with 代码块
+    执行之前执行 。如果 with 语句有 as 子句，那么该方法的返回值会被赋值给 as 子句后的变
+    量 ： 该方法可以返回多个值，因此，在 as 子句后面也可以指定多个变量（多个变量必须由
+    “（）”括起来组成元组） 。
+    >> context_manager.__exit__()（exc_type, exc_value, exc_traceback）：退出上下文管理器自动调用
+    的方法。该方法会在 with 代码块执行之后执行 。 如果 with 代码块成功执行结束，程序自
+    动调用该方法 ，调用该方法的三个参数都为 None： 如果 with 代码块因为异常而中止，程
+    序也自动调用该方法， 使用 sys.exc_info 得到的异常信息将作为调用该方法的参数。
+    通过上面的介绍不难发现，只要 一个类实现了 __enter__()和__exit__(exc type, exc value,
+exc_traceback）方法，程序就可以使用 with 语句来管理它；通过__exit__（）方法的参数，即可判断出
+with 代码块执行时是否遇到了异常 。
+    换而言之，上面程序所用 的文件对象、 FileInput 对象，其实都实现了这两个方法 ， 因此它们都
+可以接受 with 语句的管理 。
+    with_test1.py
+    with_test2.py
+    with_theory.py
+
+## 7 使用 linecache 随机读取指定行
+    linecache 模块允许从 Python 源文件中随机读取指定行，并在内部使用 缓存优化存储。 由于该
+模块主要被设计成读取 Python 源文件，因此它会用 UTF-8 字符集来读取文本文件。 实际上，使用
+linecache 模块也可以读取其他文件，只要该文件使用了 UTF-8 字符集存储。
+    linecache 模块包含以下常用函数 。
+    >> linecache.getline(filename, lineno, module_globals=None）：读取指定模块中指定文件的指定行。 其中 filename 指定文件名， lineno 指定行号。
+    >> linecache.clearcache（）：清空缓存。
+    >> linecache.checkcache(filename=None）：检查缓存是否有效。如果没有指定 filename 参数，则默认检查所有缓存的数据。

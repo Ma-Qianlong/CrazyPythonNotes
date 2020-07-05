@@ -212,6 +212,9 @@ def doUpdate(host, port, user, pwd, database, isSight = False):
                     db.updateStatusJson(row_tuples[0], rStr) if isSight is False else db.updateStatusJson_sight(row_tuples[0], rStr)
             else:
                 logger.warning('@@@@@@ stausJson 【非】数组对象： \n')
+    except Exception as e:
+        logger.error(e.args)
+        return e.args
     finally:
         db.closeConn()
 

@@ -1,0 +1,41 @@
+# 打包和发布
+
+两个常用的发布工具：zipapp 和 PyInstaller。
+
+## 1. 使用 zipapp 模块
+
+
+## 2. 使用 PyInstaller 生成可执行程序
+    在创建了独立应用（自包含该应用的依赖包）之后，还可以使用 PyInstaller 将 Python 程序生
+成可直接运行的程序，这个程序就可以被分发到对应的 Windows 或 Mac OSX 平台上运行。
+
+### 2.1安装 Pylnstaller
+    Python 默认并不包含 PyInstaller 模块，因此 需要自行安装 PyInstaller 模块。
+安装 PyInstaller 模块与安装其他 Python 模块一样，使用 pip 命令安装即可 。 在命令行输入如下
+    pip install pyinstaller
+    在 PyInstaller 模块安装成功之后，在 Python 的安装目录下的 Scripts(如， D:\Python\Python36\Scripts)
+目录下会增加一个 pyinstaller.exe 程序，接下来就可以使用该工具将 Python 程序生成 EXE 程序了。
+
+### 2.2 生成可执行程序
+    PyInstaller 工具的命令语法如下 ：
+    pyinstaller 选项 Python 源文件
+    不管这个 Python 应用是单文件的应用，还是多文件的应用， 只要在使用 pyinstaller 命令时编
+译作为程序入口的 Python 程序即可。
+    %% 提示 %%
+    PyInstaller工具是跨平台的，它既可以在 Windows 平台上使用，也可以在 Mac OSX 平台上运行。
+    在不同的平台上使用 PyInstaller 工具的方法是一样的 ，它们支持的选项也是一样的。
+
+    Pylnstaller 支持的常用选项
+    选项                         作用
+    -h, --help                  查看该模块的 帮助信息
+    -F, -onefile                产生单个的可执行文件
+    -D, --onedir                产生一个目录 （包含多个文件） 作为可执行程序
+    -a, --ascii                 不包含 Unicode 字符集文J寺
+    -d, --debug                 产生 debug 版本的可执行文件
+     w, --windowed, --noconsole 指定程序运行时不显示命令窗口（仅对 Windows 有效）
+    -c, --nowindowed, --console 指定使用命令行窗口运行程序（仅对 Windows 有效）
+    -o DIR, --out=DIR           指定 spec 文件的生成目录。 如果没有指定，则默认使用当前目录来生成 spec 文件
+    -p DIR, --path =DIR         设置 Python 导入板块的路径（ 和设置 PYTHONPATH 环境变量的作用相似 ）。 也可使用路径分隔符（ Windows 使用分号， Linux 使用 冒号）来分隔多个路径
+    -n NAME, --name=NAME        指定项目（ 产生的 spec ）名字。 如果省略该选项， 那么第一个脚本的主文件名将作为 spec 的名字
+
+    列出的只是 PyInstaller 模块所支持的常用选项，如果需要了解 PyInstaller 选项的详细信息，则可通过 pyinstaller -h 来查看 。

@@ -162,14 +162,19 @@ def chenageJsonStr(rstJson):
             continue
 
         statusList = []
-        statusListObj1 = {'pointId': obj['status']['type'] if 'open' != obj['status']['type'] else 'status', 'equal': obj['status']['equal'],
-                          'isOpen': obj['status']['isOpen'], 'add': obj['status']['add'] if 'add' in obj['status'] else 'no'}
+        statusListObj1 = {'pointId': obj['status']['type'] if 'open' != obj['status']['type'] else 'status',
+                          'equal': obj['status']['equal'],
+                          'isOpen': obj['status']['isOpen'] if 'fault' != obj['status']['type'] else str(1 - int(obj['status']['isOpen'])),
+                          'add': obj['status']['add'] if 'add' in obj['status'] else 'no'}
 
         statusListObj2 = {}
         if ('add' in obj['status'] and obj['status']['add'] != 'no'):
             statusListObj1['add'] = obj['status']['add']
             if ('addEqual' in obj['status'] and 'addOpen' in obj['status']):
-                statusListObj2 = {'pointId': obj['status']['type'] if 'open' != obj['status']['type'] else 'status', 'equal': obj['status']['addEqual'], 'isOpen': obj['status']['addOpen'], 'add': 'no'}
+                statusListObj2 = {'pointId': obj['status']['type'] if 'open' != obj['status']['type'] else 'status',
+                                  'equal': obj['status']['addEqual'],
+                                  'isOpen': obj['status']['addOpen'] if 'fault' != obj['status']['type'] else str(1 - int(obj['status']['isOpen'])),
+                                  'add': 'no'}
 
         statusList.append(statusListObj1)
         if (len(statusListObj2) > 0):
@@ -217,12 +222,12 @@ if __name__ == '__main__':
     # chenageJsonStr('[{"defaultStatus":true,"status":{"equal":"1","isOpen":"0","imageUrl":"/backend/9d74ce4f-b0aa-4b7c-98ab-11102e0014ee_水泵_关闭.png","type":"default"}},{"defaultStatus":true,"status":{"equal":"1","isOpen":"1","imageUrl":"/backend/4d8793bf-9f30-41ac-80e7-b101f2c217ed_水泵_开启.png","type":"open"}},{"defaultStatus":true,"status":{"equal":"1","isOpen":"0","imageUrl":"/backend/a8677357-a6b7-4d28-9143-397f9038bafc_水泵_故障.png","add":"no","addEqual":"","addOpen":"","type":"fault","flash":false}},{"defaultStatus":true,"status":{"equal":"1","isOpen":"1","imageUrl":"/backend/aa8a1d00-1ad5-454c-a615-67dde7549259_水泵_报警.png","add":"or","addEqual":"1","addOpen":"1","type":"alarm","flash":false}},{"defaultStatus":true,"status":{"equal":"1","isOpen":"0","imageUrl":"/backend/b8ff9930-ab67-467c-8782-f4adcbbf9e96_水泵_关闭.png","type":"status"}}]')
 
     logger.info("###sssss### backend update iconJson ")
-    doUpdate('192.168.5.249', 3136, 'root', 'root', 'db-deepctrls-wxcs-dev')
+    doUpdate('192.168.5.249', 3136, 'root', 'root', 'db-deepctrls-cddt-test')
     ss1 = time.time()
     logger.info("###eeeee### backend update iconJson 耗时: %s \n" % (ss1 - ss))
 
     logger.info("###sssss### sight update iconJson ")
-    doUpdate('192.168.5.249', 3136, 'root', 'root', 'db-deepctrls-wxcs-dev', True)
+    doUpdate('192.168.5.249', 3136, 'root', 'root', 'db-deepctrls-cddt-test', True)
     ss2 = time.time()
     logger.info("###eeeee### sight update iconJson 耗时: %s \n" % (ss2 - ss1))
 

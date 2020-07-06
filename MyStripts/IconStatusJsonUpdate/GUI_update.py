@@ -73,7 +73,7 @@ class App:
         host = self.e_host.get()
         port = self.e_port.get()
         u = self.e_user.get()
-        p = self.e_user.get()
+        p = self.e_pwd.get()
         db = self.e_db.get()
         logger.info("host:%s, prot:%s, user:%s, pwd:%s, database:%s" %(host, port, u, p, db))
         if (msgbox.askokcancel(title="warning", message='确认要开始转换吗？')):

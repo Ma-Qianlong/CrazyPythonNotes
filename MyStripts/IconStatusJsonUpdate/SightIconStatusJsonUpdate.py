@@ -162,31 +162,20 @@ def chenageJsonStr(rstJson):
             continue
 
         statusList = []
-        statusListObj1 = {'pointId': obj['status']['type'], 'equal': obj['status']['equal'],
-                          'isOpen': obj['status']['isOpen']}
-        # statusListObj1 = {'pointId': obj['status']['type']}
-        # if('equal' in obj['status']):
-        #     statusListObj1['equal'] = obj['status']['equal']
-        # else:
-        #     logger.warning(">>>>>>>>> 无【equal】属性")
-        # if ('isOpen' in obj['status']):
-        #     statusListObj1['isOpen'] = obj['status']['isOpen']
-        # else:
-        #     logger.warning(">>>>>>>>> 无【isOpen】属性")
+        statusListObj1 = {'pointId': obj['status']['type'] if 'open' != obj['status']['type'] else 'status', 'equal': obj['status']['equal'],
+                          'isOpen': obj['status']['isOpen'], 'add': obj['status']['add'] if 'add' in obj['status'] else 'no'}
 
         statusListObj2 = {}
         if ('add' in obj['status'] and obj['status']['add'] != 'no'):
-        # if ('add' in obj['status']):
             statusListObj1['add'] = obj['status']['add']
             if ('addEqual' in obj['status'] and 'addOpen' in obj['status']):
-                statusListObj2 = {'pointId': obj['status']['type'], 'equal': obj['status']['addEqual'], 'isOpen': obj['status']['addOpen'], 'add': 'no'}
-                # statusListObj2 = {'pointId': obj['status']['type'], 'equal': obj['status']['addEqual'], 'isOpen': obj['status']['addOpen']}
+                statusListObj2 = {'pointId': obj['status']['type'] if 'open' != obj['status']['type'] else 'status', 'equal': obj['status']['addEqual'], 'isOpen': obj['status']['addOpen'], 'add': 'no'}
 
         statusList.append(statusListObj1)
         if (len(statusListObj2) > 0):
             statusList.append(statusListObj2)
 
-        statusObj = {'imageUrl': obj['status']['imageUrl'], 'type': obj['status']['type'], 'list': statusList}
+        statusObj = {'imageUrl': obj['status']['imageUrl'], 'type': obj['status']['type'] if 'open' != obj['status']['type'] else 'status', 'list': statusList}
         if ('flash' in obj['status']):
             statusObj['flash'] = obj['status']['flash']
         newObj = {'defaultStatus': obj['defaultStatus'], 'status': statusObj}

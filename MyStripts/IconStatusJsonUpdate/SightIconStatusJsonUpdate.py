@@ -180,7 +180,7 @@ def chenageJsonStr(rstJson):
         if (len(statusListObj2) > 0):
             statusList.append(statusListObj2)
 
-        statusObj = {'imageUrl': obj['status']['imageUrl'], 'type': obj['status']['type'] if 'open' != obj['status']['type'] else 'status', 'list': statusList}
+        statusObj = {'imageUrl': obj['status']['imageUrl'], 'type': obj['status']['type'], 'list': statusList}
         if ('flash' in obj['status']):
             statusObj['flash'] = obj['status']['flash']
         newObj = {'defaultStatus': obj['defaultStatus'], 'status': statusObj}

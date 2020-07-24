@@ -60,3 +60,41 @@
 
 ## 3 与文件访问相关的函数
 与文件访 问相关 的函数如下。
+》 os.open(file, flags[, mode］）： 打开一个文件，并且设置打开选项， mode 参数是可选的。该函
+   数返回文件描述符。其中 flags 代表打开文件的旗标，它支持如下一个或多个选项 。
+   • os.O_RDONLY：以只读的方式打开。
+   • os.O_WRONLY ：以只 写的方式打开 。
+   • os.O_RDWR：以读写的方式打开。
+   • os.O_NONBLOCK：打开时不阻塞。
+   • os.O_APPEND：以追加的方式打开 。
+   • os.O_CREAT ：创建井打开一个新文件 。
+   • os.O_TRUNC：打开一个文件并截断它的长度为 0 （必须有写权限〉 。
+   • os.O_EXCL：在创建文件时，如果指定的文件存在 ，则返回错误 。
+   • os.O_SHLOCK：自动获取共享锁。
+   • os.O_EXLOCK：在｜动获取独立锁。
+   • os.O_DIRECT ：消除或减少缓存效果。
+   • os.O_FSYNC ：同步写入。
+   • os.O_NOFOLLOW ：不追踪软链接。
+》 os.read(fd, n） ： 从文件描述符 f d中读取最多 n 个字节，返回读到的字节串 。 如果文件描述
+   符副对应的文件己到达结尾，则返回一个空字节串。
+》 os.write(fd, str）：将字节串写入文件描述符 fd 中，返回实际写入的字节串长度。
+》 os.close(fd）： 关闭文件描述符 fd。
+》 os.lseek（fd， pos, how）： 该函数同样用于移动文件指针。 其中 how 参数指定从哪里开始移动，
+   如果将 how 设为 0 或 SEEK_SET，则表明从文件开头开始移动；如果将 how 设为 1 或
+   SEEK_CUR，则表明从文件指针当前位置开始移动：如果将 how 设为 2 或 SEEK_END,
+   则表明从文件结束处开始移动。
+
+   上面几个函数同样可用于执行文件的读写 ， 程序通常会先通过 os.open（）打开文件，然后调用
+os.read （）、 os.write（）来读写文件，当操作完成后通过 os.close（）关闭文件 。
+        os_readwrite_test.py （示范了使用上面的函数来读写文件。）
+
+》 os.fdopen(fd[, mode[, bufsize］］）：通过文件描述符 fd 打开文件，并返回对应的文件对象。
+》 os.closerange(fd_low, fd_high）：关闭从 fd_low （包含）到 fd_high （不包含）范围的所有文件描述符。
+》 os.dup(fd）：复制文件描述符。
+》 os.dup2(fd，fd2）：将一个文件描述符 fd 复制到另 一个文件描述符 fd2 中 。
+》 os.ftruncate（fd, length ）：将 fd 对应的文件截断到 length 长度，因此此处传入的 length 参数不应该超过文件大小。
+》 os.remove(path)：删除 path 对应的文件。如果 path 是一个文件夹，则抛出 OSError 错误。如果要删除目录，则使用 os.rmdir()。
+》 os.link(src, dst）：创建从 src 到 dst 的硬链接 。 硬链接是 UNIX 系统 的概念 ，如果在 Windows 系统中就是复制目标文件 。
+》 os.symlink(src, dst）：创建从 src 到 dst 的符号链接，对应于 Windows 的快捷方式。
+   由于Windows权限的缘故，因此必须以管理员身份执行 os.symlink()函数来创建快捷方式。
+        os_link_test.py （示范了在 Windows 系统中使用 os.symlink(src, dst）函数来创建快捷方式。）

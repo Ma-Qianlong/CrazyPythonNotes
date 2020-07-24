@@ -1,0 +1,45 @@
+## 线程的创建和启动
+
+    Python 提供了 _thread 和 threading 两个模块来支持多线程，其中 _thread 提供低级别的、原始的
+线程支持， 以及一个简单的锁，正如它的名字所暗示的， 一般编程不建议使用 _thread 模块；而
+threading 模块则提供了功能丰富的多线程支持。
+    Python 主要通过两种方式来创建线程。
+    〉使用 threading 模块的 Thread 类的构造器创建线程。
+    〉继承 threading 模块的 Thread 类创建线程类。
+
+# 1 调用 Thread 类的构造器创建线程
+    调用 Thread 类的构造器创建线程很简单，直接调用 threading.Thread 类的如下构造器创建线程。
+    __init__(self, group=None , target=None, name=None, args= (), kwargs=None, *, daemon=None)
+    上面的构造器涉及如下几个参数。
+    〉group：指定该线程所属的线程组。 目前该参数还未实现，因此它只能设为 None 。
+    〉target：指定该线程要调度的目标方法 。
+    〉args：指定一个元组，以位置参数的形式为 target 指定的函数传入参数。 元组的第一个元素传给 target 函数的第一个参数，元组的第二个元素传给 target 函数的第二个参数……依此类推 。
+    〉kwargs：指定一个字典，以关键宇参数的形式为 target 指定的函数传入参数。
+    〉daemon：指定所构建的线程是否为后代线程。
+
+    通过 Thread 类的构造器创建井启动多线程的步骤如下 。
+    ①调用 Thread 类的构造器创建线程对象。在创建线程对象时， target 参数指定的函数将作为线程执行体。
+    ②调用线程对象的 start（）方法启动该线程。下面程序示范了通过 Thread 类的构造器来创建线程对象。
+
+        first_thread.py (示范了通过 Thread 类的构造器来创建线程对象)
+
+    除此之外，上面程序还用到了如下函数和方法 。
+    〉threading.current thread（）： 它是 threading 模块的函数，该函数总是返回当前正在执行的线程对象。
+    〉getName（）：它是 Thread 类的实例方法，该方法返回调用它的线程名字 。
+
+    ***提示***
+    程序可以通过 setName(name);;t法为主持设直名字， 也可以通过 getName() 方法返回指定线程的名字，
+    这两个方法可通过 name 属性来代替。 在默认情况下， 主线程的名字为 MainThread，用户启动的多个线程的名字依次为 Thread-1、Thread-2、Thread-3、 . . . Thread-n 等。
+
+# 2 继承 Thread 类创建线程类
+    通过继承 Thread 类来创建并启动线程的步骤如下。
+    ①定义 Thread 类的子类，并重写该类的 run（）方法 。
+      run（）方法的方法体就代表了线程需要完成的任务，因此把 run（）方法称为线程执行体 。
+    ②创建 Thread 子类的实例， 即创建线程对象。
+    ③调用线程对象的 start() 方法来启动线程。
+
+        second_thread.py (示范了通过继承 Thread 类来创建并启动线程)
+
+
+    通常来说，推荐使用第一种方式来创建线程，因为这种方式不仅编程简单，而且线程直接包装
+target 函数，具有更清晰的逻辑结构。

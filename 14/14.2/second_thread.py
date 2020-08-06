@@ -11,7 +11,7 @@
 import threading
 
 
-# 通过集成 threading.Thread 类来创建线程类
+# 通过继承 threading.Thread 类来创建线程类
 class FkThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)

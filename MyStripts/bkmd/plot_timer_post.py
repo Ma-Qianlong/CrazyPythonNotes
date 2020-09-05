@@ -29,7 +29,7 @@ from mycolorlog import logger
 
 # 放采集的数据
 tagnameValue={}
-collect_frequency = 3
+collect_frequency = 5
 post_rt_url = 'http://127.0.0.1/sightApi/redis/setAcqdataRDatas'
 post_his_url = 'http://127.0.0.1/sightApi/other/saveHistoryDataFromNodeJs'
 # ip_tagPrefix = {"http://127.0.0.1/bkmd/192.168.10.40.html":"ZSZL#ZSZL#MGM#BCM08#",
@@ -77,6 +77,7 @@ def loadCfgInfo():
     logger.info("post_rt_url= %s" % post_rt_url)
     logger.info("post_his_url= %s" % post_rt_url)
     logger.info("ip_tagPrefix: %s" % str(ip_tagPrefix))
+    return collect_frequency
 
 
 def collectData(ipAddr, tagPrefix):
@@ -134,7 +135,7 @@ def do_run():
     # Timer(1, do_his).start()
 
 if __name__ == "__main__":
-    loadCfgInfo()
+    collect_frequency = loadCfgInfo()
     logger.info("读取配置信息OK, 15秒后开始启动爬取数据。。。。。")
     Timer(15, do_run()).start()
 

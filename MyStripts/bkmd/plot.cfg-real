@@ -1,0 +1,16 @@
+
+# base
+collect_frequency=3
+post_rt_url=http://127.0.0.1/sightApi/other/saveHistoryDataFromNodeJs
+post_his_url=http://127.0.0.1/sightApi/redis/setAcqdataRDatas
+
+
+# collect_ip_tagPrefix
+http://192.168.10.40/signals.shtm,ZSZL#ZSZL#MGM#BCM08#
+http://192.168.10.41/signals.shtm,ZSZL#ZSZL#MGM#BCM07#
+http://192.168.10.42/signals.shtm,ZSZL#ZSZL#MGM#BCM06#
+http://192.168.10.43/signals.shtm,ZSZL#ZSZL#MGM#BCM05#
+http://192.168.10.44/signals.shtm,ZSZL#ZSZL#MGM#BCM04#
+http://192.168.10.45/signals.shtm,ZSZL#ZSZL#MGM#BCM03#
+http://192.168.10.46/signals.shtm,ZSZL#ZSZL#MGM#BCM02#
+http://192.168.10.47/signals.shtm,ZSZL#ZSZL#MGM#BCM01#

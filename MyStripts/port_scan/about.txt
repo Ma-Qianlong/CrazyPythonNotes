@@ -1,0 +1,117 @@
+利用Python进行端口扫描
+https://www.cnblogs.com/dachenzi/p/8676104.html
+
+Python端口扫描
+　　在Linux中判断一台主机是否可达，可以使用ping命令，而判断端口是否打开，可以使用telnet命令，但是telnet命令没有超时时间的参数，使用起来不是很方便，那么可以利用Python来完成一个端口扫描的功能
+
+
+#!/usr/bin/env python
+
+import socket
+
+def get_ip_status(ip,port):
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        server.connect((ip,port))
+        print('{0} port {1} is open'.format(ip, port))
+    except Exception as err:
+        print('{0} port {1} is not open'.format(ip,port))
+    finally:
+        server.close()
+
+if __name__ == '__main__':
+    host = '10.0.0.11'
+    for port in range(20,100):
+        get_ip_status(host,port)
+　上面使用的是python的socket模块完成的端口检测， 其实python的内置模块telnetlib也可以完成端口检测任务
+
+
+import telnetlib
+
+def get_ip_status(ip,port):
+    server = telnetlib.Telnet()      # 创建一个Telnet对象
+    try:
+        server.open(ip,port)         # 利用Telnet对象的open方法进行tcp链接
+        print('{0} port {1} is open'.format(ip, port))
+    except Exception as err:
+        print('{0} port {1} is not open'.format(ip,port))
+    finally:
+        server.close()
+
+if __name__ == '__main__':
+    host = '10.0.0.11'
+    for port in range(20,100):
+        get_ip_status(host,port)
+　　当然上面这两种方式都是串行执行的，这在多IP多端口的情况下是非常慢得，所以引入多线程threading模块。
+
+
+#!/usr/bin/env python
+
+import telnetlib
+import threading
+
+def get_ip_status(ip,port):
+    server = telnetlib.Telnet()
+    try:
+        server.open(ip,port)
+        print('{0} port {1} is open'.format(ip, port))
+    except Exception as err:
+        print('{0} port {1} is not open'.format(ip,port))
+    finally:
+        server.close()
+
+if __name__ == '__main__':
+    host = '10.0.0.11'
+    threads = []
+    for port in range(20,100):
+        t = threading.Thread(target=get_ip_status,args=(host,port))
+        t.start()
+        threads.append(t)
+
+    for t in threads:
+        t.join()
+　　前面的例子中我们的程序为每个ip的每个端口创建一个线程，在IP和Port较多的时候，会暴露出各种问题(比如频繁的上下文切换),因此，我们需要限制进程数量，那么可以利用Queue模块。
+
+#!/usr/bin/env python
+
+import telnetlib
+import threading
+import queue
+
+def get_ip_status(ip):
+    server = telnetlib.Telnet()
+    for port in range(20,100):
+        try:
+            server.open(ip,port)
+            print('{0} port {1} is open'.format(ip, port))
+        except Exception as err:
+            print('{0} port {1} is not open'.format(ip,port))
+        finally:
+            server.close()
+
+def check_open(q):
+    try:
+        while True:
+            ip = q.get_nowait()
+            get_ip_status(ip)
+    except queue.Empty as e:
+        pass
+
+if __name__ == '__main__':
+    host = ['10.0.0.10','10.0.0.11','10.0.0.12']     # 这里模拟多IP地址的情况，也可以从文件中读取IP——list
+    q = queue.Queue()
+    for ip in host:
+        q.put(ip)
+    threads = []
+    for i in range(10):
+        t = threading.Thread(target=check_open,args=(q,))
+        t.start()
+        threads.append(t)
+
+    for t in threads:
+        t.join()
+　　这里使用了Queue，那么就会引出生产者和消费者模型，生产者只需要把信息存入到队列中，消费者消费时只需要看队列中有没有，这样极大程度了解耦了我们的程序。
+
+
+
+所有巧合的是要么是上天注定要么是一个人偷偷的在努力。

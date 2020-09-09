@@ -7,7 +7,7 @@
 # @Time  : 2020-09-08 9:41
 # -*- *************** -*-
 
-
+import os
 import telnetlib
 from concurrent.futures import ThreadPoolExecutor
 import threading
@@ -42,6 +42,15 @@ class CountDownLatch:
             # logger.debug("2---" + str(self.count))
         finally:
             self.condition.release()
+
+def ping(ip):
+    re = os.system("ping -n 1 -w 1 %s" % ip)
+    if re:
+        print('ping %s is fail' % ip)
+        return 0
+    else:
+        print('ping %s is ok' % ip)
+        return 1
 
 server = telnetlib.Telnet()
 def getPortStatus(ip, port, timeout):

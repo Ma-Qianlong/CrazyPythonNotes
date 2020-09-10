@@ -18,7 +18,6 @@ import json
 from datetime import datetime, timedelta
 from mycolorlog import *
 
-
 class CountDownLatch:
     def __init__(self, count):
         self.count = count
@@ -46,10 +45,10 @@ class CountDownLatch:
 def ping(ip):
     re = os.system("ping -n 1 -w 1 %s" % ip)
     if re:
-        print('ping %s is fail' % ip)
+        logger.info('ping %s is fail' % ip)
         return 0
     else:
-        print('ping %s is ok' % ip)
+        logger.info('ping %s is ok' % ip)
         return 1
 
 server = telnetlib.Telnet()
@@ -69,7 +68,10 @@ def check_open_acion1(timeout):
     try:
         while True:
             ipport = queue_todo.get_nowait()
-            r = getPortStatus(ipport['ip'], ipport['port'], timeout)
+            if(ipport['port']):
+                r = getPortStatus(ipport['ip'], ipport['port'], timeout)
+            else:
+                r = ping(ipport['ip'])
             tagnameValue[ipport['tagname']] = r
             # time.sleep(0.1)
     except queue.Empty as e:
@@ -89,7 +91,7 @@ def loadCfgInfo():
     isTagPrefix = False
     for line in lines:
 
-        if (not line or line == "" or line == '\n' or line.isspace()):
+        if (not line or line == "" or line == '\n' or line.isspace() or line.startswith("#")):
             continue
 
         if (line.startswith("[BASE]")):
@@ -101,6 +103,8 @@ def loadCfgInfo():
             isTagPrefix = True
             continue
         if (isBase):
+            if (line.startswith("log_level")):
+                log_level = str(line.split("=")[1]).split()[0]
             if (line.startswith("collect_frequency")):
                 collect_frequency = int(line.split("=")[1])
             if (line.startswith("thread_pool_max_workers")):
@@ -117,11 +121,12 @@ def loadCfgInfo():
                 ddd = line.split(",")
                 ports_list.append({"ip": ddd[0], "port": ddd[1], "tagname": ddd[2].split()[0]})
 
+    logger.info("log_level= %s" % log_level)
     logger.info("collect_frequency= %d" % collect_frequency)
     logger.info("post_rt_url= %s" % post_rt_url)
     logger.info("post_his_url= %s" % post_rt_url)
     logger.info("ports_list: %s" % str(ports_list))
-    return (collect_frequency, thread_pool_max_workers, telnet_timeout, post_rt_url, post_his_url, ports_list)
+    return (collect_frequency, thread_pool_max_workers, telnet_timeout, post_rt_url, post_his_url, ports_list, log_level)
 
 # 放采集的数据
 tagnameValue={}
@@ -167,6 +172,9 @@ if __name__ == '__main__':
     post_rt_url = cfg_tuple[3]
     post_his_url = cfg_tuple[4]
     ports = cfg_tuple[5]
+    log_level = cfg_tuple[6]
+
+    logger.setLevel(log_level)
 
     do_start_his()
 

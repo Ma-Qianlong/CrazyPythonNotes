@@ -49,8 +49,8 @@ file_handler.setLevel(logging.DEBUG)
 fmt1 = '%(asctime)s [%(threadName)s] [%(name)s] [%(levelname)s] %(filename)s[line:%(lineno)d] %(message)s'
 fmt2 = '[%(asctime)s.%(msecs)03d] %(filename)s -> %(funcName)s line:%(lineno)d [%(levelname)s] : %(message)s'
 fmt2_color ='%(log_color)s[%(asctime)s.%(msecs)03d] %(filename)s -> %(funcName)s line:%(lineno)d [%(levelname)s] : %(message)s'
-fmt_my = '%(asctime)s.%(msecs)03d - PID:%(thread)d - [%(threadName)s] [%(levelname)-8s] %(filename)s -> %(funcName)s[line:%(lineno)d] - %(message)s'
-fmt_my_color = '%(log_color)s%(asctime)s.%(msecs)03d - PID:%(thread)d - [%(threadName)-8s] [%(levelname)s] %(filename)s -> %(funcName)s[line:%(lineno)d] - %(message)s'
+fmt_my = '%(asctime)s.%(msecs)03d - PID:%(thread)d - [%(threadName)s] [%(levelname)s] %(filename)s -> %(funcName)s[line:%(lineno)d] - %(message)s'
+fmt_my_color = '%(log_color)s%(asctime)s.%(msecs)03d - PID:%(thread)d - [%(threadName)s] [%(levelname)s] %(filename)s -> %(funcName)s[line:%(lineno)d] - %(message)s'
 
 # 日志输出格式
 file_formatter = logging.Formatter(

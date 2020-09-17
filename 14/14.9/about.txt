@@ -1,0 +1,57 @@
+# 多进程
+    除可以进行多线程编程之外， Python 还支持使用多进程来实现并发编程。
+
+## 1. 使用 fork 创建新进程
+    Python 的 os 模块提供了 一个 fork（）方法，该方法可以 fork 出 来一个子进程。简单来说， fork()
+方法的作用在于：程序会启动两个进程（ 一个是父进程， 一个是 fork 出来的子进程）来执行从 os.fork()
+开始的所有代码。 fork（）方法不需要参数，它有一个返回值，该返回值表明是哪个进程在执行。
+    》如果 fork（）方法返回 0，则表明是 fork 出来的子进程在执行。
+    》如果 fork（）方法返回非 0，则表明是父进程在执行， 该方法返回 fork（）出来的子进程的进程ID。
+
+        \fork_test.py （示范了使用 fork（）方法创建新进程的过程）
+    在 Linux 或 Mac OS X 系统上运行上面程序（ Windows 不支持 fork（）方法，因此在 Windows 系统上运行上面程序会报错）
+
+    在实际编程中，程序可通过 fork（）方法来创建一个子进程，然后通过判断 fork（）方法的返回值
+来确定程序是否正在执行子进程，也就是把需要并发执行的任务放在 if pid == 0：的条件执行体中，
+这样就可以启动多个子进程来执行并发任务。
+
+## 2. 使用 multiprocessing.Process 创建新进程
+    虽然使用 os.fork（）方法可以启动多个进程，但这种方式显然不适合 Windows，而 Python 是跨
+平台的语言，所以 Python 绝不能仅仅局限于 Windows 系统，因此 Python 也提供了其他方式在
+Windows 下创建新进程。
+    Python 在 multiprocessing模块下提供了 Process 来创建新进程。 与 Thread 类似的是，使用 Process
+创建新进程也有两种方式。
+    〉 以指定函数作为 target，创建 Process 对象即可创建新进程 。
+    〉 继承 Process 类，井重写它 的 run（）方法来创建进程类，程序创建 Process 子类的实例作为进程。
+
+    Process 类也有如下类似的方法和属性。
+    > run()： 重写该方法可实现进程的执行体。
+    > start(): i亥方法用于启动进程。
+    > join([timeout])： 该方法类似于线程的 join()方法，当前进程必须等待被 join 的进程执行完成才能向下执行。
+    > name ： 该属性用于设置或访问进程的名字。
+    > is_alive()：判断进程是否还活着。
+    > daemon ： 该属性用于判断或世置进程的后台状态。
+    > pid ： 返回进程的 PID 。
+    > authkey：返回进程的授权 key 。
+    > terminate()： 中断该进程。
+
+    >>> 1. 以指定函数作为 target 创建新进程
+
+        \first_process.py
+
+    需要说明的是，通过 multiprocessing.Process 来创建井启动进程时，
+    程序必须先判断 if __name__ == '__main__', 否则可能引发异常。
+
+    >>> 2. 继承 Process 类创建子进程
+    继承 Process 类创建子进程的步骤如下。
+    a。定义继承 Process 的子类， 重写其 run（）方法准备作为进程执行体 。
+    b。创建 Process 子类的实例。
+    c。调用 Process 子类的实例的 start（）方法来启动进程 。
+
+        \second_process.py
+
+    通常，推荐使用第一种方式来创建进程，因为这种方式不仅编程简单 ，而且进程直接包装 target
+函数，具有更清晰的逻辑结构 。
+
+
+## 3. Context 和启动进程的方式

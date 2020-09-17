@@ -8,9 +8,9 @@
 # -*- *************** -*-
 
 
-from concurrent.futures import ThreadPoolExecutor
 import threading
-import time
+from concurrent.futures import ThreadPoolExecutor
+
 
 # 定义一个准备作为线程任务的函数
 def action(max):
@@ -19,6 +19,7 @@ def action(max):
         print(threading.current_thread().name + " " + str(i))
         my_sum += i
     return my_sum
+
 
 # 创建一个包含 4 个线程的线程池
 with ThreadPoolExecutor(max_workers=4) as pool:

@@ -55,3 +55,27 @@ Windows 下创建新进程。
 
 
 ## 3. Context 和启动进程的方式
+    根据平台的支持 ， Python 支持三种启动进程的方式 。
+    》 spawn：父进程会启动一个全新的 Python 解释器进程。 在这种方式下，子进程只能继承那
+       些处理 run（）方法所必需的资源。 典型的，那些不必要的文件描述器和 handle 都不会被继承。
+       使用这种方式来启动进程，其效率比使用 fork 或 forkserver 方式要低得多。
+    》 fork ：父进程使用 OS.fork（）来启动一个 Python 解释揣进程。 在这种方式下， 子进程会继承
+       父进程的所有资源， 因此子进程基本等效于父进程。这种方式只在 UNIX 平台上有效， UNIX
+       平台默认使用这种方式来启动进程。
+    》 forkserver ： 如果使用这种方式来启动进程，程序将会启动一个服务器进程。 在以后的时间
+       内， 当程序再次请求启动新进程时，父进程都会连接到该服务器进程， 请求由服务器进程
+       来 fork 新进程。 通过这种方式启动的进程不需要从父进程继承资源。这种方式只在 UNIX
+       平台上有效。
+
+    从上面介绍可以看出，如果程序使用 UNIX 平台（包括 Linux 和 Mac OS X ）， Python 支持三种
+启动进程的方式； 但如果使用 Windows 平台，则只能使用效率最低的 spawn 方式。
+    multiprocessing 模块提供了 一个 set_start_ method() 函数 ， 该函数可用于设置启动进程的方式——
+必须将这行设置代码放在所有与多进程有关的代码之前。
+
+            \start_method_test.py (示范了显式设置启动进程的方式)
+
+    还有一种设置进程启动方式的方法，就是利用 get_context（）方法来较取 Context 对象，调用该
+方法时可传入 spawn 、 fork 或 forkserver 字符串。 Context 拥有和 multiprocessing 相同的 API ，因此
+程序可通过 Context 来创建井启动进程。
+
+            \Context_test.py

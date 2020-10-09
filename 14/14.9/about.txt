@@ -79,3 +79,63 @@ Windows 下创建新进程。
 程序可通过 Context 来创建井启动进程。
 
             \Context_test.py
+
+## 4. 使用进程池管理进程
+    与线程池类似的是，如果程序需要启动多个进程，也可以使用进程池来管理进程。程序可以通
+过 multiprocessing 模块的 Pool（）函数创建进程池，进程池实际上是 multiprocessing.pool.Pool 类。
+    进程池具有如下常用方法。
+    》》apply(func[, args[, kwds］］）：将 func 函数提交给进程池处理。其中 args 代表传给 func 的位置
+        参数， kwds 代表传给func 的关键字参数。该方法会被阻塞直到 func 函数执行完成。
+    》》apply_async(func[, args[, kwds[, callback[, error_callback］］］］）：这是 apply（）方法的异步版本 ，
+        该方法不会被阻塞。其中 callback 指定 func 函数完成后的回调函数， error_callback 指定 func 函数出错后的回调函数。
+    》》map（func， iterable[, chunksize］）：类似于 Python 的 map（）全局函数，只不过此处使用新进程
+        对 iterable 的每一个元素执行 map 函数 。
+    》》map_async(func, iterable[, chunksize[, callback[, eηor callback］］］）：这是 map（）方法的异步版
+        本，该方法不会被阻塞。其中 callback 指定 func 函数完成后的回调函数， error_callback 指定 func 函数出错后的回调函数。
+    》》imap(func, iterable[, chunksize］）：这是 map（）方法的延迟版本 。
+    》》imap_unordered(func, iterable[, chunksize］）：功能类似于 imap（）方法，但该方法不能保证所
+        生成的结果（包含多个元素〉与原 iterable 中的元素顺序一致。
+    》》starmap(func, iterable[, chunksize］）：功能类似于 map（）方法，但该方法要求 iterable 的元素也
+        是 iterable 对象，程序会将每一个元素解包之后作为 func 函数的参数。
+    》》close（）：关闭进程池 。在调用该方法之后，该进程池不能再接收新任务，它会把当前进程池中的所有任务执行完成后再关闭自己。
+    》》terminate（）： 立即中止进程池。
+    》》join（）：等待所有进程完成。
+    从上面介绍不难看出，如果程序只是想将任务提交给进程池执行，则可调用 apply（）或 apply_async（）方法；
+如果程序需要使用指定函数将 iterable 转换成其他 iterable，则可使用 map() 或 imap() 方法。
+
+            \pool_test.py(示范了使用 appIy_async() 方法启动进程)
+
+    进程池同样实现了上下文管理协议，因此程序可以使用 with 子句来管理进程池，这样就可以避免程序主动关闭进程池。
+
+            \pool_test2.py(示范了使用 map（）方法来启动进程)
+
+## 5. 进程通信
+    Python 为进程通信提供了两种机制。
+    》 Queue：一个进程向 Queue 中放入数据 ， 另 一个进程从 Queue 中读取数据。
+    》 Pipe: Pipe 代表连接两个进程的管道。 程序在调用 Pipe() 函数时会产生两个连接端 ，分别交
+给通信的两个进程，接下来进程既可从该连接端读取数据，也可向该连接端写入数据。
+
+    1. 使用 Queue 实现进程通信
+    下面先看使用 Queue 来实现进程通信。 multiprocessing 模块下的 Queue 和 queue 模块下的 Queue
+基本类似，它们都提供了 qsize() 、 empty() 、 full()、 put()、 put_nowait（）、 get（）、 get_nowait（）等方法。 区
+别只是 multiprocessing 模块下的 Queue 为进程提供服务，而 queue 模块下的 Queue 为线程提供服务。
+
+            \Queue_test.py(使用 Queue 来实现进程之间的通信)
+
+    2. 使用 Pipe 实现进程通信
+    使用 Pipe 实现进程通信，程序会调用 multiprocessing . Pipe（）函数来创建一个管道，该函数会返
+回两个 PipeConnection 对象，代表管道的两个连接端（ 一个管道有两个连接端，分别用于连接通信的两个进程）。
+    PipeConnection 对象包含如下常用方法。
+    >>> send(obj）：发送一个 obj 给管道的另一端，另 一端使用 recv（）方法接收。需要说明的是，该
+        obj 必须是可 picklable 的（ Python 的序列化机制），如果该对象序列化之后超过 32MB, 则很可能会引发 ValueError 异常 。
+    >>> recv()：接收另 一端通过 send（）方法发送过来的数据 。
+    >>> fileno()： 关于连接所使用的文件描述器。
+    >>> close()：关闭连接。
+    >>> poll([timeout]）： 返回连接中是否还有数据可以读取。
+    >>> send_bytes(buffer[, offset[, size］］） ： 发送字节数据 。
+        如果没有指定 offset、size 参数，则默认发送 buffer 字节串的全部数据：如果指定了 offset 和 size 参数，则只发送 buffer 字节串中
+        从 offset 开始、长度为 size 的字节数据。通过该方法发送的数据，应该使用 recv_bytes（）或 recv_bytes_into 方法接收。
+    >>> recv_bytes([maxlength］）： 接收通过 send bytes（）方法发送的数据， maxlength 指定最多接收的字节数。该方法返回接收到的字节数据。
+    >>> recv_bytes_into (buffer[, offset］）：功能与 recv_bytes（）方法类似，只是该方法将接收到的数据放在 buffer 中。
+
+            \Pipe_test.py(示范如何使用 Pipe 来实现两个进程之间的通信)

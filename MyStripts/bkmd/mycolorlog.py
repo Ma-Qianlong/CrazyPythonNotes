@@ -35,7 +35,7 @@ logger = logging.getLogger('plot_bkmd_kpa')
 console_handler = logging.StreamHandler()
 # 输出到文件
 # file_handler = logging.FileHandler(filename='mylog.log', mode='a', encoding='utf8')
-file_handler = logging.handlers.TimedRotatingFileHandler(filename='mylog.log', when='D', interval=1, backupCount=15, encoding=None, delay=False, utc=False)
+file_handler = logging.handlers.TimedRotatingFileHandler(filename='plot_bkmd_kpa_log.log', when='D', interval=1, backupCount=15, encoding=None, delay=False, utc=False)
 # 设置后缀名称，跟strftime的格式一样
 # 注意：filehanlder.suffix的格式必须这么写，才能自动删除旧文件，如果设定是天，就必须写成“%Y-%m-%d.log”，写成其他格式会导致删除旧文件不生效。这个配置在源码里能看出来，但是在官方文档并没有说明这一点！！！！！！！！！！
 # file_handler.suffix = "%Y-%m-%d_%H-%M-%S.log"

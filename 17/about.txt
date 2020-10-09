@@ -39,3 +39,6 @@
     -n NAME, --name=NAME        指定项目（ 产生的 spec ）名字。 如果省略该选项， 那么第一个脚本的主文件名将作为 spec 的名字
 
     列出的只是 PyInstaller 模块所支持的常用选项，如果需要了解 PyInstaller 选项的详细信息，则可通过 pyinstaller -h 来查看 。
+
+    # Python 打包成单文件_console ::
+    pyinstaller -F -c plot_timer_post.py -n plot_bkmd_kpa_with_console

@@ -11,6 +11,7 @@
 import multiprocessing
 import os
 
+
 def foo(q):
     print('被启动的新线程：（%s）' % os.getpid())
     q.put('Python')

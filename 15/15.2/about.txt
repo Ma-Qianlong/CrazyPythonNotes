@@ -1,0 +1,165 @@
+# 15.2 Python 的基本网络支持
+    Python 模块的优势在网络支持这个部分得到了极好的体现， Python 的 网络模块非常丰富，这
+些网络模块既提供了底层的 TCP 、 UDP 协议的网络通信功能，也提供了对应用层 HTTP,FTP 、 SMTP,
+POP3 协议的支持。
+
+## 15.2.1 Python 的网络模块概述
+   根据前面对网络分层棋型的介绍，我们知道实际的网络模型大致分为四层，这四层各有对应的
+网络协议提供支持，如图所示。
+        +-----------+--------------------------------------------------------------------------------+
+        +           +                                                                                +
+        +           +                                                                                +
+        +  应用层    +   * SMTP * | * FTP * | * DNS * | * SNMP * | * NFS * | * HTTP * | * TELNET *    +
+        +           +                                                                                +
+        +           +                                                                                +
+        +-----------+--------------------------------------------------------------------------------+
+        +  传输层    +                 * TCP *        |         * UDP *                               +
+        +-----------+--------------------------------------------------------------------------------+
+        +           +    * ICMP * | * IGMP *                                                         +
+        +  网络层    +                             * IP *                                             +
+        +           +                                                    * ARP * | * RARP *          +
+        +-----------+--------------------------------------------------------------------------------+
+        +           +                                                                                +
+        +  网络接口层 +                     * LAN * | * MAN * | * WAN *                                +
+        +           +                                                                                +
+        +-----------+--------------------------------------------------------------------------------+
+
+    网络层协议主要是 E，它是所有互联网协议的基础，其中 ICMP ( Internet Control Message
+Protocol ) 、 IGMP Cinternet Group Manage Protocol) 、 ARP (Address Resolution Protocol ）、 RARP
+CReverse Address Resolution Protocol ） 等协议都可认为是 IP 协议族的子协议 。 通常来说 ，很少会直接基于网络层进行应用程序编程。
+    传输层协议主要是 TCP 和 UDP, Python 提供了 socket 等模块针对传输层协议进行编程。
+    应用层协议就更多了 ，正如上图所示的， FTP 、 HTTP, TELNET 等协议都属于应用层协议 ，Python 同样为基于应用层协议的编程提供了丰富的支持。
+    虽然 Python 自带的标准库已经提供了很多与网络有关的模块，但如果在使用时觉得不够方便，
+则不要忘记了 Python 的优势： 大量的第三方模块随时可用于增强 Python 的功能。
+
+    Python 标准库中的网络相关模块
+        模块                                描述
+        socket ---------------------------- 基于传输层 TCP 、 UDP 协议进行网络编程的模块
+        asyncore -------------------------- socket 模块的异步版， 支拘基于传输层协议的异步通信
+        asynchat -------------------------- asyncore 的增强版
+        cgi ------------------------------- 基本的 CGI (Conm1on Gateway Interface, 早期开发动态网站的技术）的支持
+        email ----------------------------- E-mail 和 MIME 消息处理模块
+        ftplib ---------------------------- 支椅 FTP 协议的客户端模块
+        httplib、http.client --------------  支持 HTTP 协议以及 HTTP 客户揣的模块
+        imaplib --------------------------- 支持 IMAP4 协议的客户端模块
+        mailbox --------------------------- 操作不同格式邮箱的模块
+        mailcap --------------------------- 支持 Mailcap 文件处理的模块
+        nntphb ---------------------------- 支持 NTTP 协议的客户端模块
+        smtplib --------------------------- 支持 SMTP 协议（发送邮件）的客户端模块
+        poplib ---------------------------- 支持 POP3 协议的客户端棋块
+        telnetlib ------------------------- 支持 TELNET 协议的客户端棋块
+        urllib 及其子模块 ------------------- 支持 URL 处理的模块
+        xmlrpc、 xmlrpc.server、xmlrpc.client 支持 XML-RPC 协议的服务器端和客户端快块
+
+
+## 15.2.2 使用 urllib.parse 子模块
+    URL ( Uniform Resourc巳 Locator）对象代表统一资源定位器，它是指向互联网“资源”的指针。
+资源可以是简单的文件或目录，也可以是对复杂对象的引用，例如对数据库或搜索引擎的查询 。 在
+通常情况下， URL 可以由协议名 、主机、端口和资源路径组成，即满足如下格式：
+    protocol://host:port/path
+    例如如下的 URL 地址：
+    http://www.crazyit.org/index.php
+
+    urllib 模块则 包含了多个用于处理 URL 的子模块。
+    );;- urllib.request ：这是最核心的子模块，它包含了打开和读取 URL 的各种函数。
+    );;- urllib.error ： 主要包含由 urllib.request 子模块所引发的各种异常。
+    );;- urllib.parse ： 用于解析 URL。
+    );;- urllib.robotparser ： 主要用于解析 ro bots.txt 文件。
+    通过使用 urllib 模块可以打开任意 URL 所指向的资源，就像打开本地文件一样，这样程序就
+能完整地下载远程页面。如果再与第 10 章介绍的 re 模块结合使用，那么程序完全可以提取页面中
+各种信息，这就是所谓的“网络爬虫”的初步原理。
+    下面先介绍 urllib.parse 子模块中用于解析 URL 地址和查询字符串的函数。
+    >>> urllib.parse.urlparse(urlstring， scheme＝''， allow_fragments=True）： 该函数用于解析 URL 字符
+        串。程序返回一个 ParseResult 对象，可以获取解析出来的数据。
+    >>> urllib.parse.urlunparse(parts）： 该函数是上一个函数的反向操作， 用于将解析结果反向拼接成 URL 地址。
+    >>> urllib.parse.parse_qs(qs, keep_blank_values=False, strict_parsing=False，encoding＝'utf-8'，
+        errors＝'replace'): 该函数用于解析查询字符串（ application/x-www-form-urlencoded 类型的数据），并以 dict 形式返回解析结果。
+    >>> urllib.parse.parse_qsl(qs, keep_blank_values=False, strict_parsing=False，encoding＝'utf-8'，
+        errors＝'replace'): 该函数用于解析查询字符串 （ application/x-w\vw-form-urlencoded 类型的数据），并以列表形式返回解析结果。
+    >>> urllib.parse.urlencode(query, doseq=False, safe＝'', encoding=None, errors=None, quote_via=quote_plus）：
+        将字典形式或列表形式的请求参数恢复成请求字符串。该函数相当于parse_qs（）、 parse_qsl（）的逆函数。
+    >>> urllib.parse.urljoin(base, url, allow_fragments=True）： 该函数用于将一个 base URL 和另一个资源 URL 连接成代表绝对地址的 URL。
+        例如，如下程序使用 urlparse（）函数来解析 URL 字符串。
+                \urlparse_test.py
+
+    urljoin（）函数负责将两个 URL 拼接在一起 ， 返回代表绝对地址的 URL 。 这里主要可能出现 3 种情况。
+    》被拼接的 URL 只是一个相对路径 path （不以斜线开头），那么该 URL 将会被拼接到 base 之后，
+        如果 base 本身包含 path 部分， 则用被拼接的 URL 替换 base 所包含的 path 部分。
+    》被拼接的 URL 是一个根路径 path （以单斜线开头），那么该 URL 将会被拼接到 base 的域名之后。
+    》被拼接的 URL 是一个绝对路径 path （以双斜线开头），那么该 URL 将会被拼接到 base 的scheme 之后。
+
+## 15.2.3 使用 urllib.request 读取资源
+    在 urllib.request 子模块下包含了一个非常实用 的 urllib.request.urlopen（url， data=None）方法 ， 该
+方法用于打开 url 指定 的资源 ， 并从中读取数据。根据请求 url 的不同 ， 该方法的返回值会发生动态改变。
+如果 url 是一个 HTTP 地址， 那么该方法返回 一个 http.client.HTTPResponse 对象。
+         \urlopen_test.py
+
+     在使用 urlopen（）函数时，可以通过 data 属性向被请求的 URL 发送数据。
+         \data_test.py
+
+    实际上，使用 data 属性不仅可以发送 POST 请求，还可以发送 PUT 、 PATCH 、 DELETE 等请
+求， 此时 需要使用 urllib.request.Request 来构建请求参数 。程序使用 urlopen（）函数打开远程资源时，
+第一个 url 参数既可以是 URL 字符串，也可以使用 urllib.request.Request 对象。 urllib.request.Request
+对象的构造器如下：
+     urllib.request.Request(url, data=None, headers= {}, origin_req_host=None, unverifiable=False,
+method=None ）： 从该构造器可以看出，使用 Request 可以通过 method 指定请求方法，也可以通过
+data 指定请求参数，还可以通过 headers 指定请求头。
+            \Request_test.py (示范了如何通过 Request 对象来发送 PUT 请求)
+
+      通过 urlopen（）函数打开远程资源之后 ，也可 以非常方便地读取远程资源一一甚至实现多线程下
+载。 如下程序实现了一个多线程下载的工具类 。
+            \DownUtil.py
+      上面程序中定义了 DownThread 线程类，该线程类负责读取从 start_pos 开始、长度为
+current_part_size 的所有字节数据，并写入本地文件对象中 。 DownThread 线程类的 run（）方法就是一
+个简单的输入／输出实现 。
+    程序中 DownUtils 类的 download（）方法负责按如下步骤来实现多线程下载。
+    1. 使用 urlopen（）方法打开远程资源 。
+    2. 获取指定 的 URL 对象所指向资源的大小 （通过 Content-Length 响应头获取）。
+    3. 计算每个线程应该下载 网络资源 的哪个部分（从哪个字节开始，到哪个字节结束）。
+    4. 依次创建并启动多个线程来下载网络资源的指定部分 。
+
+    ***提示***
+    上面程序已经实现了多线程下载的核心代码，如果要实现断点下载， 则需要额外增加一个配置文件
+    （读者可以发现，所有的断点下载工具都会在下载开始时生成两个文件：一个是与网络资源具有相同大小的空文件；
+    一个是配直文件），该配直文件分别记录每个线程已经下载到哪个字节，当网络断开后再次开始下载时，
+    每个线程根据配置文件中记录的位置向后下载即可。
+
+    有了上面的 DownUtil 工具类之后，接下来就可以在主程序中调用该工具类的 download（）方法
+执行下载 ，如下面的程序所示。
+            \multithread_down.py
+
+
+## 15.2.3 管理 cookie
+    从上面的介绍可以发现， 使用 urlopen() 既可发送 GET 请求，也可发送 POST 、 PUT 、 DELETE 、
+PATCH 等请求。因此，在绝大部分 时候，完全可以使用 urllib.request 模块代替 http.client 模块。
+    有时候，用户可能需要访问 Web 应用中 的被保护页面，如果使用浏览器则十分简单，通过系
+统提供的登录页面登录系统，浏览器会负责维护与服务器之间的 session， 如果用户登录的用户名、
+密码符合要求，就可以访问被保护资源了。
+    如果使用 urllib.request 模块来访 问被保护页面 ， 则同样需要维护与服务器之间的 session ，此时
+就需要借助于 cookie 管理器来实现。
+
+    ***提示***
+        HTTP 是一种 “请求-响应” 式协议： 客户端 向服务器发送请求，服务器向客户揣
+    生成响应数据。 这就涉及一个问题：服务器如何辨别两次请求的客户端是同 一个客户端；
+    呢？ 答案是 session id. 当客户端第 一次向服务器发送请求时，服务器会为 该客户端分
+    配一个 session id 作 为 其标识，服务器在生成响应数据时，也会把该 session id 作为响应
+    数据发送给客户端。当客户端第 二次向服务器发送请求时，如果客户端把自己的 session id
+    也送给服务器， 且服务器端的 session id 还未过期，服务器就知道该客户端与前一次发送请求的客户端是同一个。
+
+    如果程序直接使用 urlopen（）发送请求，并且并未管理与服务器之间的 session ，那么服务器就
+无法识别两次请求是否是同一个客户端发出的。为 了有效地管理 session，程序可引入 http.cookiejar 模块。
+    此外，程序还需要使用 OpenerDirector 对象来发送请求。
+    为了使用 urllib.request 模块通过 cookie 来管理 session， 可按如下步骤进行操作。
+    1. 创建 http.cookiejar.CookieJar 对象或其子类的对象。
+    2. 以 CookieJar 对象为参数，创建 urllib.request.HTTPCookieProcessor 对象，该对象负责调用
+       CookieJar 来管理 cookie 。
+    3. 以 HTTPCookieProcessor 对象为参数， 调用 urllib.request.build_opener() 函数创建
+       OpenerDirector 对象。
+    4. 使用 OpenerDirector 对象来发送请求， 该对象将会通过 HTTPCookieProcessor 调用 CookieJar来管理 cookie 。
+
+            \cookie_test.py（示范了先登录 Web 应用，然后访问 Web 应用中的被保护页面 。）
+
+    如果将上面程序中①号粗体字代码的注释取消，程序就会把 cooki e 信息写入 a txt 文件中。这
+意味着该程序将会把服务器响应的 sessio n id 等 cooki e 持久化保存在 a.txt 文件中，后面程序可以读
+取该 cooki巳文件信息，这样程序就可以模拟前面登录过的客户端，从而直接访问被保护页面了。例如如下程序 。
+            \cookie _load.py

@@ -1,0 +1,5 @@
+# Netscape HTTP Cookie File
+# http://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file!  Do not edit.
+
+127.0.0.1	FALSE	/sight	FALSE		JSESSIONID	3C4A038C3B9479837FA837E5B93D943F

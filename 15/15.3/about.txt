@@ -1,0 +1,145 @@
+# 15.3 基于 TCP 协议的网络编程
+    TCP/IP 通信协议是一种可靠的网络协议，它在通信的两端各建立一个 socket，从而形成虚拟
+的网络链路。 一旦建立了虚拟的网络链路，两端的程序就可以通过该链路进行通信了。 Python 的
+socket 模块为基于 TCP 协议的网络通信提供了良好的封装， Python 使用 socket 对象来代表两端的
+通信端口，并通过 socket 进行网络通信。
+
+## 15.3.1 TCP 协议基础
+    IP 是 Internet 上使用的 一个关键协议，它的全称是 Internet Protocol ，即 Internet 协议，通常简
+称 IP 协议。通过使用 IP 协议，使 Internet 成为一个允许连接不同类型的计算机和不同操作系统的网络。
+    要使两台计算机彼此能进行通信 ，必须使这两台计算机使用同一种“语言”， IP 协议只保证计
+算机能发送和接收分组数据。 IP 协议负责将消息从一个主机传送到另 一个主机 ， 消息在传送的过
+程中被分割成一个个小包。
+    尽管通过安装 IP 软件，保证了计算机之间可以发送和接收数据，但 IP 协议还不能解决数据分
+组在传输过程中可能出现的问题。 因此，连接 Internet 的计算机还需要安装 TCP 协议来提供可靠且
+无差错的通信服务。
+    TCP 被称作端对端协议， 这是因为它在两台计算机的连接中起了重要作用——当一台计算机需
+要与另一台远程计算机连接时号， TCP 协议会让它们之间建立一个虚拟链路，用于发送和接收数据。
+    TCP 协议负责收集这些数据包，并将其按照适当的顺序传送，接收端接收到数据包后再将其
+正确地还原。 TCP 协议保证数据包在传送过程中准确无误。 TCP 协议采用重发机制——当一个通
+信实体发送一个消息给另一个通信实体后， 需要接收到另一个通信实体的确认信息，如果没有接收
+到该确认信息，则会重发信息。
+    通过重发机制， TCP 协议向应用程序提供了可靠的通信连接，使其能够自动适应网络上的各种变化。
+即使在 Internet 暂时出现堵塞的情况下， TCP 协议也能够保证通信的可靠性。
+    只有把 TCP 和 IP 两个协议结合起来，才能保证 Internet 在复杂的环境下正常运行。
+凡是要连接到 Internet 的计算机，都必须同时安装和使用 TCP/IP 协议。
+
+## 15.3.2 使用 socket 创建 TCP 服务端
+    程序在使用 socket 之前，必须先创建 socket 对象，可通过该类的如下构造器来创建 socket 实例。
+    >> socket.socket(family=AF_INET, type=SOCK_STREAM, proto=O, fileno=None)
+       上面构造器的前三个参数比较重要，其中 ：
+    >> family 参数用于指定网络类型。 该参数支持 socket.AF_UNIX (UNIX 网络）、 socket.AF_INET
+      （基于 IPv4 协议的网络）和 socket.AF_INET6 （基于 IPv6 协议的网络）这三个常量。
+    >> type 参数用于指定网络 Sock 类型。该参数可支持 SOCK_STREAM （默认值，创建基于 TCP
+       协议的 socket）、 SOCK_DGRAM （创建基于 UDP 协议的 socket ）和 SOCK_RAW（创建
+       原始 socket ）。一般常用的是 SOCK_STREAM 和 SOCK_DGRAM 。
+    >> proto 参数用于指定协议号，如果没有特殊要求，该参数默认为 0，并可以忽略。
+    在创建了 socket 之后，接下来需要将两个 socket 连接起来。 从图 15.4 中并没有看出 TCP 协议
+控制的两个通信实体之间有服务器端和客户端之分，这是因为此图是两个通信实体之间己经建立虚
+拟链路之后的示意图。 在两个通信实体之间没有建立虚拟链路时，必须有一个通信实体先做出“主
+动姿态”，主动接收来自其他通信实体的连接请求。
+    作为服务器端使用的 socket 必须被绑定到指定 IP 地址和端口，并在该 IP 地址和端口进行监听，
+接收来自客户端的连接。
+    socket 对象提供了如下常用方法。
+    >> socket.accept()：作为服务器端使用的 socket 调用该方法接收来自客户端的连接。
+    >> socket.bind(address)：作为服务器端使用的 socket 调用该方法，将该 socket 绑定到指定 address,
+       该 address 可以是一个元组，包含 IP 地址和端口。
+    >> socket.close()：关闭连接，回收资源。
+    >> socket.connect(address)：作为客户端使用的 socket 调用该方法连接远程服务器。
+    >> socket.connect_ex(address)：该方法与上一个方法的功能大致相同，只是当程序出错时，该
+       方法不会抛出异常，而是返回一个错误标识衍。
+    >> socket.listen([backlog])：作为服务器端使用的 socket 调用该方法进行监听 。
+    >> socket.makefile(mode='r', buffering=None, ＊, encoding=None, errors=None, newline=None)：创建
+       一个和该 socket 关联的文件对象 。
+    >> socket.recv(bufsize[, flags］）： 接收 socket 中的数据。 该方法返回 bytes 对象代表接收到的数据。
+    >> socket.recvfrom(bufsize[, flags］）：该方法与上一个方法的功能大致相同，只是该方法的返回
+       值是（bytes , address）元组 。
+    >> socket.recvmsg(bufsize[, ancbufsize[, flags］］）：该方法不仅接收来自 socket 的数据，还接收来
+       自 socket 的辅助数据，因此该方法的返回值是一个长度为 4 的元组——（data, ancdata,
+       msg_flags, address），其中 ancdata 代表辅助数据 。
+    >> socket.recvmsg_into(buffers[, ancbufsize[, flags］］）：类似于 socket.recvmsg（）方法，但该方法将
+       接收到的数据放入 buffers 中 。
+    >> socket.recvfrom_into(buffer[, nbytes[, flags］］）：类似于 socket.recvfrom（）方法，但该方法将接
+       收到的数据放入 buffer 中 。
+    >> socket.recv_into(buffer[, nbytes[, flags］］）：类似于 recv（）方法，但该方法将接收到的数据放入
+       buffer 中 。
+    >> socket.send(bytes[, flags］）：向 socket 发送数据，该 socket 必须与远程 socket 建立了连接 。
+       该方法通常用于在基于 TCP 协议的网络中发送数据。
+    >> socket.sendto(bytes, address） 。 向 socket 发送数据，该 socket 应该没有与远程 socket 建立连
+       接。 该方法通常用于在基于 UDP 协议的网络中发送数据 。
+    >> socket.sendfile(file, offset=O , count=None）：将整个文件内容都发送出去，直到遇到文件的EOF。
+    >> socket.shutdown(how）：关闭连接 。 其中 how 用于设置关闭方式 。
+
+    掌握了这些常用的方法之后，可以大致归纳出 TCP 通信的服务器端编程的基本步骤 。
+    1. 服务器端先创建一个 socket 对象。
+    2. 服务器端 socket 将自己绑定到指定 IP 地址和端口。
+    3. 服务器端 socket 调用 listen（）方法监听网络。
+    4. 程序采用循环不断调用 socket 的 accept（）方法接收来自客户端的连接。
+    代码片段如下 ：
+    ＃创建 socket 对象
+    s = socket.socket ()
+    ＃将 socket 绑定到本机 IP 地址和1端口
+    s.bind((’ 192 . 168 . 1.88 ’, 30000))
+    ＃服务器端开始监听来自客户端的连接
+    s.listen()
+    while True:
+        ＃每当接收到客户端 socket 的请求时，该方法就返回对应的 socket 和远程地址
+        c, addr = s .accept()
+        ...
+
+## 15.3.3 使用 socket 通信
+    客户端也是先创建一个 socket 对象，然后调用 socket 的 connect（）方法建立与服务器端的连接，
+这样就可以建立一个基于 TCP 协议的网络连接。
+    TCP 通信的客户端编程的基本步骤大致归纳如下。
+    1. 客户端先创建一个 socket 对象 。
+    2. 客户端 socket 调用 connect（）方法连接远程服务器 。
+    代码片段如下：
+    ＃创建 socket 对象
+    s = socket.socket()
+    ＃连接远程服务器
+    s.connect(('192.168.1.88', 30000))
+    ＃下面就可以使用 socket 进行通信 了
+    ...
+
+    当执行上面程序中的粗体宇代码（connect）时，将会连接到指定服务器，让服务器端 socket 的 accept（）方
+法向下执行，于是服务器端和客户端就产生一对互相连接的 socket 。
+    当服务器端和客户端产生了对应的 socket 之后，就得到了如图 15.4 所示的通信示意图，程序
+无须再区分服务器端和客户端，而是通过各自的 socket 进行通信。通过前面介绍我们知道， socket
+提供了大量方法来发送和接收数据。
+    >> 发送数据 ： 使用 send（）方法 。 注意, sendto（）方法用于 UDP 协议的通信。
+    >> 接收数据：使用 recv_xxx（）方法 。
+
+        \server.py(服务端socket)      \client.py（客户端socket）
+
+## 15.3.4 加入多线程
+    前面的服务器端和客户端只是进行了简单的通信操作：服务器端接受客户端的连接之后，向客
+户端输出 一个字符串，而客户端也只是读取服务器端的字符串后就退出了 。 在实际应用中，客户端
+则可能需要和服务器端保持长时间通信，即服务器端需要不断地读取客户端数据，并向客户端写入
+数据：客户端也需要不断地读取服务器端数据，并向服务器端写入数据 。
+    由于 socket 的 recv（）方法在成功读取到数据之前，线程会被阻塞，程序无法继续执行。考虑到这
+个原因，服务器端应该为每个 socket 都单独启动一个线程，每个线程负责与一个客户端进行通信。
+客户端读取服务器端数据的线程同样会被阻塞，所以系统应该单独启动一个线程，该线程专门
+负责读取服务器端数据。
+    现在考虑实现一个命令行界面的 C/S 聊天室应用，服务器端应该包含多个线程，每个 socket
+对应一个线程，该线程负责从 socket 中读取数据（从客户端发送过来的数据），并将所读取到的数
+据向每个 socket 发送一 次（将一个客户端发送过来的数据“广播”给其他客户端），因此需要在服
+务器端使用 list 来保存所有的 socket 。
+    下面是服务器端的实现代码。该服务器端代码定义了一个 server_target（）函 数，该函数将会作
+为线程执行的 target，负责处理每个 socket 的数据通信。
+
+        \MultiThread\server\MyServer.py
+
+    每个客户端都应该包含两个线程，其中一个负责读取用户的键盘输入内容，并将用户输入的数
+据输出到 socket 中；另一个负责读取 socket 中的数据（从服务器端发送过来的数据），并将这些数
+据打印输出。由程序的主线程负责读取用户的键盘输入内容，由新线程负责读取 socket 数据。
+
+        \MultiThread\client\MyClient.py
+
+    上面程序中的主线程读取到用户的键盘输入内容后，将该内容发送到 socket 中（实际上就是
+把数据发送给服务器端） 。
+    此外，当主线程的 socket 连接到服务器端之后，以 read_from_server（）函数为 target 启动了新线
+程来处理 socket 通信，如程序中①号粗体字代码所示。 read_from_server（）函数使用死循环读取 socket
+中的数据（就是来自服务器端的数据），并将这些内容在控制台打印出来，如 read_from_server（）函
+数中的粗体字代码所示。
+
+## 15.3.5 记录用户信息

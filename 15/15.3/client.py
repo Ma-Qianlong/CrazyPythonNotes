@@ -17,4 +17,5 @@ s = socket.socket()
 # 连接远程服务器
 s.connect(('127.0.0.1', 30000))
 print('--%s--' % s.recv(1024).decode('utf-8'))
+print('--%s--' % s.recv(1024).decode('utf-8'))
 s.close()

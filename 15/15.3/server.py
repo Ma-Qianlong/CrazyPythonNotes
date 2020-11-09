@@ -23,5 +23,6 @@ while True:
     print(c)
     print('连接地址：', addr)
     c.send('您好，服务器向你送--新年祝福！'.encode('utf-8'))
+    c.send('您好，服务器向你送--过节快乐！'.encode('utf-8'))
     # 关闭连接
     c.close()

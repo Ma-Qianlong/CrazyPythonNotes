@@ -44,6 +44,7 @@ def do_start():
     # 设置日志级别
     logger.setLevel(base_dict.get("log_level"))
 
+    tagPrefix_efb_dict = {}
     for i in range(int(base_dict.get('meter_no'))):
         efb_ = cofig.get_items('EFB-' + str(i + 1))
         efbCfg = dict(efb_)
@@ -51,7 +52,10 @@ def do_start():
 
         redis = HandleRedis(host=redis_dict.get("host"), port=int(redis_dict.get("port")), db=int(redis_dict.get("db")), key_prefix=redis_dict.get("rt_key_prefix"))
         efb = ApexEfb(host=efbCfg.get("host"), port=int(efbCfg.get("port")), timeout=float(efbCfg.get("out_time")), tag_prefix=efbCfg.get("tag_prefix"))
+        tagPrefix_efb_dict[efbCfg.get("tag_prefix")] = efb
         threading.Thread(target=server_target, args=(redis, efb, float(efbCfg.get("scan_interval")))).start()
 
+    # time.sleep(5)
+    # print("&&&&&&&& " + str(tagPrefix_efb_dict.get("SS#DD#MM#d01#").online))
 if __name__ == '__main__':
     do_start()

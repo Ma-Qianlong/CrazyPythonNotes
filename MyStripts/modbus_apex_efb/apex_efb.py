@@ -26,7 +26,7 @@ dict_suffix = {1: 'fault', 3: 'u', 4: 'i', 5: 'p', 6: 'i_a_fd', 7: 'i_b_fd', 8: 
                42: 'i_r_a_out',
                43: 'i_r_b_out', 44: 'i_r_c_out',
                72: 'elec_rect_rcnt', 75: 'fault_rec'}
-# 设备模式及状态(按位) 30027
+# 设备状态及运行模式(按位) 30027
 dict_suffix_27 = {0: 'status_off', 1: 'status_on', 2: 'fault', 3: 'status_offline', 4: 'status_em', 5: 'status_standby',
                   8: 'mode_fd', 9: 'mode_svg', 10: 'mode_bidc', 11: 'mode_debug', 12: 'mode_rect', 13: 'mode_fd_prty',
                   14: 'mode_self_insp'}
@@ -46,8 +46,15 @@ suffix_rect_s = 'elec_rect_s'
 
 # 读写点参数， 40000+key 为寄存器地址
 suffix_sp = {1: 'status', 2: 'clock_year', 3: 'clock_month', 4: 'clock_day', 5: 'clock_hour', 6: 'clock_minute',
-             7: 'clock_second', 8: 'clock_msec', 23: 'ip1', 24: 'ip2', 25: 'ip3', 26: 'ip4', 32: 'u_fd_thsd',
-             33: 'u_fd_start', 34: 'elec_svg', 35: 'mode'}
+             7: 'clock_second', 8: 'clock_msec', 23: 'ip1', 24: 'ip2', 25: 'ip3', 26: 'ip4', 27: 'rec_read',
+             32: 'u_fd_thsd', 33: 'u_fd_start', 34: 'elec_svg', 35: 'mode'}
+# 故障录波参数列表，10001~28001，每个参数2000个
+rec_params = ['rec_ac_va', 'rec_ac_vb', 'rec_ac_vc',
+              'rec_ac_ia', 'rec_ac_ib', 'rec_ac_ic',
+              'rec_dc_i', 'rec_switch', 'rec_dc_v']
+
+# 下发相关
+for_write = {'u_fd_thsd': 40032, 'u_fd_start': 40033, 'elec_svg': 40034, 'mode': 40035}
 
 
 class ModbusTCP_apex_efb:
@@ -59,13 +66,14 @@ class ModbusTCP_apex_efb:
         self.timeout = timeout
         self.tag_prefix = tag_prefix
         self.fault_rec = 0  # 是否有故障录波 30075	-- 0无；1有
+        self.reading_rec = False  # 是否正在读取故障录波数据
 
     def to_connect(self):
         try:
             # 连接MODBUS TCP 从机
             master = modbus_tcp.TcpMaster(self.host, self.port)
             master.set_timeout(self.timeout)
-            demo1 = master.execute(1, cst.READ_INPUT_REGISTERS, 30000, 1)
+            demo1 = master.execute(self.slave, cst.READ_INPUT_REGISTERS, 30000, 1)
             logger.info("@@@@@@ conenct to %s:%d slave-%s SUCCESS" % (self.host, self.port, self.slave))
             self.online = True
             self.master = master
@@ -78,31 +86,28 @@ class ModbusTCP_apex_efb:
 
     def poll_yc_04(self):
         if self.online and self.master is not None:
-            oneRes = self.master.execute(1, cst.READ_INPUT_REGISTERS, 30000, 76, data_format=">" + (76 * "h"))
-            logger.debug("@@@@@@ --yc04--30000-- %s:%d slave-%s, %s, hex- %s" % (
+            oneRes = self.master.execute(self.slave, cst.READ_INPUT_REGISTERS, 30000, 76, data_format=">" + (76 * "h"))
+            logger.debug("@@@@@@ --yc04--30000-- %s:%d slave-%s, int-%s, hex- %s" % (
                 self.host, self.port, self.slave, str(oneRes), self.intTupleToHexStr(oneRes)))
 
             tt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             r_list = []
 
-            int_20 = oneRes[20]
-            int_21 = oneRes[21]
-            r_list.append({'tag': self.tag_prefix + suffix_fd, 'val': (int_20 << 8 + int_21), 'time': tt})
-
-            int_45 = oneRes[45]
-            int_46 = oneRes[46]
-            r_list.append({'tag': self.tag_prefix + suffix_rect, 'val': (int_45 << 8 + int_46), 'time': tt})
-
-            int_73 = oneRes[73]
-            int_74 = oneRes[74]
-            r_list.append({'tag': self.tag_prefix + suffix_runtime, 'val': (int_73 << 8 + int_74), 'time': tt})
-
+            # 总回馈电量
+            r_list.append({'tag': self.tag_prefix + suffix_fd, 'val': (oneRes[20] << 8 + oneRes[21]), 'time': tt})
+            # 总整流电量
+            r_list.append({'tag': self.tag_prefix + suffix_rect, 'val': (oneRes[45] << 8 + oneRes[46]), 'time': tt})
+            # 设备累积运行时间
+            r_list.append({'tag': self.tag_prefix + suffix_runtime, 'val': (oneRes[73] << 8 + oneRes[74]), 'time': tt})
+            # 是否有故障录波
+            self.fault_rec = oneRes[75]
+            # 设备状态及运行模式(按位)
             b_27 = bin(oneRes[27])
             bit_list_27 = [0] * (18 - len(b_27)) + list(b_27[2:])
             for i in range(16):
                 if dict_suffix_27.get(i) is not None:
                     r_list.append({'tag': self.tag_prefix + dict_suffix_27[i], 'val': bit_list_27[i], 'time': tt})
-
+            # 开关接触器状态(按位)
             b_28 = bin(oneRes[28])
             bit_list_28 = [0] * (18 - len(b_28)) + list(b_28[2:])
             for i in range(16):
@@ -115,15 +120,16 @@ class ModbusTCP_apex_efb:
             for k in dict_suffix.keys():
                 r_list.append({'tag': self.tag_prefix + dict_suffix[k], 'val': oneRes[k], 'time': tt})
 
-            logger.debug("@@@@@@ --yc--30000-- " + str(r_list))
+            logger.debug("@@@@@@ --yc04--30000-- " + str(r_list))
             return r_list
         else:
             return None
 
     def poll_yc_03(self):
         if self.online and self.master is not None:
-            oneRes = self.master.execute(1, cst.READ_HOLDING_REGISTERS, 40000, 36, data_format=">" + (36 * "h"))
-            logger.debug("@@@@@@ --yc03--40000-- %s:%d slave-%s, %s, hex- %s" % (
+            oneRes = self.master.execute(self.slave, cst.READ_HOLDING_REGISTERS, 40000, 36,
+                                         data_format=">" + (36 * "h"))
+            logger.debug("@@@@@@ --yc03--40000-- %s:%d slave-%s, int-%s, hex- %s" % (
                 self.host, self.port, self.slave, str(oneRes), self.intTupleToHexStr(oneRes)))
 
             tt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -138,19 +144,39 @@ class ModbusTCP_apex_efb:
             logger.debug("@@@@@@ --yc03--40000-- " + str(r_list))
             return r_list
 
-    def poll_fault_recode(self):
+    def poll_fault_recode(self, redis=None):
         """
         读取故障录波数据
         :return:
         """
         if self.online and self.master is not None:
-            oneRes = self.master.execute(1, cst.READ_INPUT_REGISTERS, 10001, 2000, data_format=">" + (2000 * "h"))
-            logger.debug("@@@@@@ --fault_recode-- %s:%d slave-%s, %s, hex- %s" % (
-                self.host, self.port, self.slave, str(oneRes), self.intTupleToHexStr(oneRes)))
+            self.reading_rec = True
 
             tt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             r_list = []
+
+            quantity_of_x = 100
+            p_res = ()
+            for i in range(180):
+                starting_address = 10001 + i * 100
+                oneRes = self.master.execute(self.slave, cst.READ_INPUT_REGISTERS, starting_address, quantity_of_x,
+                                             data_format=">" + (quantity_of_x * "h"))
+                logger.debug("@@@@@@ --fault_recode-- %s:%d slave-%s, SA-%d, QX-%d, int-%s, hex-%s" % (
+                    self.host, self.port, self.slave, starting_address, quantity_of_x, str(oneRes),
+                    self.intTupleToHexStr(oneRes)))
+                p_res += oneRes
+                if i % 20 == 19:
+                    r_list.append({'tag': self.tag_prefix + rec_params[i // 20], 'val': str(p_res), 'time': tt})
+                    p_res = ()
+
             logger.debug("@@@@@@ --fault_recode-- " + str(r_list))
+
+            if redis is not None:
+                redis.putFaultRecData(r_list)
+            # 下发录波数据已读取命令
+            self.master.execute(self.slave, cst.WRITE_SINGLE_REGISTER, 40027, output_value=1)
+            self.reading_rec = False
+
             return r_list
         else:
             return None
@@ -158,19 +184,34 @@ class ModbusTCP_apex_efb:
     def poll_and_analysis(self):
         rr = []
 
-        # yc04 = self.poll_yc_04()
-        # if yc04 is not None:
-        #     rr += yc04
-        #
-        # yc03 = self.poll_yc_03()
-        # if yc03 is not None:
-        #     rr += yc03
+        yc04 = self.poll_yc_04()
+        if yc04 is not None:
+            rr += yc04
 
-        yc03 = self.poll_fault_recode()
+        yc03 = self.poll_yc_03()
         if yc03 is not None:
             rr += yc03
 
         return rr
+
+    def write_with_single(self, tagValList):
+        """
+        下发指令，此处为单个一一下发
+        :param tagValList: eg [{"tag":"tag1, "val":"0"},{"tag":"tag2, "val":"2"}]
+        :return:
+        """
+        try:
+            if tagValList is not None and len(tagValList) > 0:
+                for i in tagValList:
+                    pp = i.get('tag').split("#")[4];
+                    val = int(i.get('val'))
+                    if for_write[pp] is not None and val is not None:
+                        self.master.execute(self.slave, cst.WRITE_SINGLE_REGISTER, for_write[pp], output_value=val)
+                        logger.info("@@@@@@ --YT--%d(%s)-- %s:%d slave-%d, val: %d OK" % (
+                                    for_write[pp], pp, self.host, self.port, self.slave, val))
+        except Exception as e:
+            logger.error("@@@@@@ --YT--%d(%s)-- %s:%d slave-%d, val: %d error, %s" % (
+                                    for_write[pp], pp, self.host, self.port, self.slave, val, e))
 
     def intTupleToHexStr(self, tuple):
         rr = "";
@@ -184,8 +225,21 @@ if __name__ == '__main__':
     # ae = ModbusTCP_apex_efb("221.226.253.38", 502)
     # tt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     # print(tt)
-    ae = ModbusTCP_apex_efb(host="221.226.253.38", tag_prefix="SS#DD#MM#d01#")
+    # ae = ModbusTCP_apex_efb(host="221.226.253.38", tag_prefix="SS#DD#MM#d01#")
+    ae = ModbusTCP_apex_efb(host="127.0.0.1", tag_prefix="SS#DD#MM#d01#")
     ae.to_connect()
+
+    # ae.poll_yc_04()
+    #     #
+    #     # ae.poll_yc_03()
+    #     #
+    #     # ae.poll_fault_recode()
+
+    tagValList = [
+        {"tag":"SS#DD#MM#d02#u_fd_start", "val":"100"},
+        {"tag":"SS#DD#MM#d02#u_fd_thsd", "val":"1200"}
+                  ]
+    ae.write_with_single(tagValList)
 
     # hr = HandleRedis.HandleRedis(host='127.0.0.1', port=6379)
     # while True:

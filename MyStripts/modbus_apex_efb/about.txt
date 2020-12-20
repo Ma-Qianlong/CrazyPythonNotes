@@ -1,0 +1,45 @@
+# 亚派能量回馈设备采集器说明
+
+1. config.ini 文件中不能出现中文：
+    注意：
+    a. [EFB-*]是由1开始的
+    b.参数“meter_no”的值，比必须小于等于[EFB-*]的数量
+
+2. 目前实时数据 及 故障录波数据 都存到redis中，后续逻辑由上层平台处理
+
+3. 指令下发接口（RESTful）, “127.0.0.1”即ip改成实际主机ip即可，header必须得加:
+    url：  http://127.0.0.1:5000/writeTagVal
+    header： {"key":"Content-Type","value":"application/json"}
+    请求参数示例：
+    {
+        "data":[
+            {"tag":"SS#DD#MM#d02#u_fd_start","val":"500"},
+            {"tag":"SS#DD#MM#d02#u_fd_thsd","val":"1500"},
+            {"tag":"SS#DD#MM#d01#u_fd_start","val":"200"},
+            {"tag":"SS#DD#MM#d01#u_fd_thsd","val":"1300"}
+        ]
+    }
+
+4. 实际点位处理参考：点表定义.pdf
+
+5. 目前在读取某个设备的故障录波数据期间(测试读完大概需要5~6秒时间)，其他数据无法更新
+
+6. modbus exception codes  异常代码
+    # 代码功能不合法
+    ILLEGAL_FUNCTION = 1
+    # 数据地址不合法
+    ILLEGAL_DATA_ADDRESS = 2
+    # 数据值不合法
+    ILLEGAL_DATA_VALUE = 3
+    # slave设备失败
+    SLAVE_DEVICE_FAILURE = 4
+    # 命令已收到
+    COMMAND_ACKNOWLEDGE = 5
+    # slave设备忙
+    SLAVE_DEVICE_BUSY = 6
+    # 内存奇偶校验差
+    MEMORY_PARITY_ERROR = 8
+
+
+
+

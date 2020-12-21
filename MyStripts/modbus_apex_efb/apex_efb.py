@@ -65,15 +65,18 @@ class ModbusTCP_apex_efb:
         self.slave = slave
         self.timeout = timeout
         self.tag_prefix = tag_prefix
+
+        self.online = False
         self.fault_rec = 0  # 是否有故障录波 30075	-- 0无；1有
         self.reading_rec = False  # 是否正在读取故障录波数据
 
     def to_connect(self):
         try:
             # 连接MODBUS TCP 从机
+            logger.info("@@@@@@ starting conenct to %s:%d slave-%s ......" % (self.host, self.port, self.slave))
             master = modbus_tcp.TcpMaster(self.host, self.port)
             master.set_timeout(self.timeout)
-            demo1 = master.execute(self.slave, cst.READ_INPUT_REGISTERS, 30000, 1)
+            master.execute(self.slave, cst.READ_INPUT_REGISTERS, 30001, 1)
             logger.info("@@@@@@ conenct to %s:%d slave-%s SUCCESS" % (self.host, self.port, self.slave))
             self.online = True
             self.master = master
@@ -225,15 +228,15 @@ if __name__ == '__main__':
     # ae = ModbusTCP_apex_efb("221.226.253.38", 502)
     # tt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     # print(tt)
-    # ae = ModbusTCP_apex_efb(host="221.226.253.38", tag_prefix="SS#DD#MM#d01#")
-    ae = ModbusTCP_apex_efb(host="127.0.0.1", tag_prefix="SS#DD#MM#d01#")
+    ae = ModbusTCP_apex_efb(host="221.226.253.38", tag_prefix="SS#DD#MM#d01#")
+    # ae = ModbusTCP_apex_efb(host="127.0.0.1", tag_prefix="SS#DD#MM#d01#")
     ae.to_connect()
 
-    # ae.poll_yc_04()
-    #     #
-    #     # ae.poll_yc_03()
-    #     #
-    #     # ae.poll_fault_recode()
+    ae.poll_yc_04()
+
+    ae.poll_yc_03()
+
+    ae.poll_fault_recode()
 
     tagValList = [
         {"tag":"SS#DD#MM#d02#u_fd_start", "val":"100"},

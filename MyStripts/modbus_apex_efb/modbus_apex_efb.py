@@ -83,26 +83,29 @@ def find_last(string, str):
 
 
 def server_target(redis, efb, scan_interval):
-    # try:
-    efb.to_connect()
-    while efb.online:
-        dd = efb.poll_and_analysis()
-        redis.putRTData(dd)
-        logger.info("****** scan onece for %s:%d slave-%s finished, data size: %d" %
-                    (efb.host, efb.port, efb.slave, len(dd)))
-        if efb.fault_rec == 1 and efb.reading_rec is not True:
-            ts = time.time()
-            logger.info("****** there has fault recode for %s:%d slave-%s to read" %
-                        (efb.host, efb.port, efb.slave))
-            # threading.Thread(target=efb.poll_fault_recode, args=(redis,))
-            efb.poll_fault_recode(redis)
-            logger.info("****** fault recode for %s:%d slave-%s read finished, cost time(s): %f" %
-                        (efb.host, efb.port, efb.slave, (time.time() - ts)))
+    try:
+        efb.to_connect()
+        logger.info("****** it will start scan for %s:%d slave-%s after 3 second ..." %
+                    (efb.host, efb.port, efb.slave))
+        time.sleep(3)
+        while efb.online:
+            dd = efb.poll_and_analysis()
+            redis.putRTData(dd)
+            logger.info("****** scan onece for %s:%d slave-%s finished, data size: %d" %
+                        (efb.host, efb.port, efb.slave, len(dd)))
+            if efb.fault_rec == 1 and efb.reading_rec is not True:
+                ts = time.time()
+                logger.info("****** there has fault recode for %s:%d slave-%s to read" %
+                            (efb.host, efb.port, efb.slave))
+                # threading.Thread(target=efb.poll_fault_recode, args=(redis,))
+                efb.poll_fault_recode(redis)
+                logger.info("****** fault recode for %s:%d slave-%s read finished, cost time(s): %f" %
+                            (efb.host, efb.port, efb.slave, (time.time() - ts)))
 
-        time.sleep(scan_interval)
+            time.sleep(scan_interval)
 
-    # except Exception as e:
-    #     logger.error("****** scan onece for %s:%d slave-%s ERROR, %s" % (efb.host, int(efb.port), efb.slave, e))
+    except Exception as e:
+        logger.error("****** scan onece for %s:%d slave-%s ERROR, %s" % (efb.host, int(efb.port), efb.slave, e))
 
 
 tagPrefix_efb_dict = {}
@@ -123,6 +126,7 @@ def do_start():
     # 设置日志级别
     logger.setLevel(base_dict.get("log_level"))
 
+    logger.info("### start load %s meters threads ... " % base_dict.get('meter_no'))
     for i in range(int(base_dict.get('meter_no'))):
         efb_ = cofig.get_items('EFB-' + str(i + 1))
         efbCfg = dict(efb_)
@@ -142,4 +146,6 @@ def do_start():
 
 if __name__ == '__main__':
     do_start()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    time.sleep(5)
+    logger.info("start web server on port 5000 ...\n")
+    app.run(host="0.0.0.0", port=5000, debug=False)

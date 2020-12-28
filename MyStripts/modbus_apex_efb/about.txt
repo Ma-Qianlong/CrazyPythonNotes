@@ -7,7 +7,7 @@
 
 2. 目前实时数据 及 故障录波数据 都存到redis中，后续逻辑由上层平台处理
 
-3. 指令下发接口（RESTful）, “127.0.0.1”即ip改成实际主机ip即可，header必须得加:
+3. 指令下发接口（RESTful）, “127.0.0.1”即ip改成实际主机ip即可，header必须得加, 且tagname必须符合标准:
     url：  http://127.0.0.1:5000/writeTagVal
     header： {"key":"Content-Type","value":"application/json"}
     请求参数示例：

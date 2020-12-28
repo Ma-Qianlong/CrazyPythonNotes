@@ -54,7 +54,7 @@ rec_params = ['rec_ac_va', 'rec_ac_vb', 'rec_ac_vc',
               'rec_dc_i', 'rec_switch', 'rec_dc_v']
 
 # 下发相关
-for_write = {'u_fd_thsd': 40032, 'u_fd_start': 40033, 'elec_svg': 40034, 'mode': 40035}
+for_write = {'status': 40001, 'u_fd_thsd': 40032, 'u_fd_start': 40033, 'elec_svg': 40034, 'mode': 40035}
 
 
 class ModbusTCP_apex_efb:

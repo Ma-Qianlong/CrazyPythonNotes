@@ -46,7 +46,7 @@ class ReadConfig:
         获取指定item的配置数据
         :param item: 不可为空
         :param param: 参数key值
-        :return: 当param为None时，返回item的所有键值对；反正返回指定参数值
+        :return: 当param为None时，返回item的所有键值对；反之返回指定参数值
         """
         if param:
             return self.cf.get(item, param)

@@ -126,6 +126,8 @@ def do_start():
     # 设置日志级别
     logger.setLevel(base_dict.get("log_level"))
 
+    server_port = int(base_dict.get('server_port'))
+
     logger.info("### start load %s meters threads ... " % base_dict.get('meter_no'))
     for i in range(int(base_dict.get('meter_no'))):
         efb_ = cofig.get_items('EFB-' + str(i + 1))
@@ -147,5 +149,7 @@ def do_start():
 if __name__ == '__main__':
     do_start()
     time.sleep(5)
-    logger.info("start web server on port 5000 ...\n")
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    server_port = ReadConfig().get_items("BASE", 'server_port')
+    server_port = int(server_port)
+    logger.info("start web server on port %d ...\n" % server_port)
+    app.run(host="0.0.0.0", port=server_port, debug=False)

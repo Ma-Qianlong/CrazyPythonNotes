@@ -130,10 +130,11 @@ class ModbusTCP_apex_efb:
 
     def poll_yc_03(self):
         if self.online and self.master is not None:
-            oneRes = self.master.execute(self.slave, cst.READ_HOLDING_REGISTERS, 40000, 36,
-                                         data_format=">" + (36 * "h"))
+            oneRes = self.master.execute(self.slave, cst.READ_HOLDING_REGISTERS, 40001, 35,
+                                         data_format=">" + (35 * "h"))
             logger.debug("@@@@@@ --yc03--40000-- %s:%d slave-%s, int-%s, hex- %s" % (
                 self.host, self.port, self.slave, str(oneRes), self.intTupleToHexStr(oneRes)))
+            oneRes = (0,) + oneRes  # 因40000的地址被删除，此处在前补个位
 
             tt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             r_list = []
@@ -178,6 +179,7 @@ class ModbusTCP_apex_efb:
                 redis.putFaultRecData(r_list)
             # 下发录波数据已读取命令
             self.master.execute(self.slave, cst.WRITE_SINGLE_REGISTER, 40027, output_value=1)
+            logger.info("@@@@@@ --YT--%d(%s)-- %s:%d slave-%d, val: %d, OK" % (40027, 'rec_read', self.host, self.port, self.slave, 1))
             self.reading_rec = False
 
             return r_list
@@ -186,14 +188,22 @@ class ModbusTCP_apex_efb:
 
     def poll_and_analysis(self):
         rr = []
-
-        yc04 = self.poll_yc_04()
-        if yc04 is not None:
-            rr += yc04
-
-        yc03 = self.poll_yc_03()
-        if yc03 is not None:
-            rr += yc03
+        try:
+            yc04 = self.poll_yc_04()
+            if yc04 is not None:
+                rr += yc04
+        except Exception as e:
+            logger.error(
+                "@@@@@@ --poll_and_analysis--READ_INPUT_REGISTERS(04), 30000, 76 for %s:%d slave-%s ERROR, %s" % (
+                self.host, int(self.port), self.slave, e))
+        try:
+            yc03 = self.poll_yc_03()
+            if yc03 is not None:
+                rr += yc03
+        except Exception as e:
+            logger.error(
+                "@@@@@@ --poll_and_analysis--READ_HOLDING_REGISTERS(03), 40000, 36 for %s:%d slave-%s ERROR, %s" % (
+                    self.host, int(self.port), self.slave, e))
 
         return rr
 
@@ -210,11 +220,11 @@ class ModbusTCP_apex_efb:
                     val = int(i.get('val'))
                     if for_write[pp] is not None and val is not None:
                         self.master.execute(self.slave, cst.WRITE_SINGLE_REGISTER, for_write[pp], output_value=val)
-                        logger.info("@@@@@@ --YT--%d(%s)-- %s:%d slave-%d, val: %d OK" % (
-                                    for_write[pp], pp, self.host, self.port, self.slave, val))
+                        logger.info("@@@@@@ --YT--%d(%s)-- %s:%d slave-%d, val: %d, OK" % (
+                            for_write[pp], pp, self.host, self.port, self.slave, val))
         except Exception as e:
             logger.error("@@@@@@ --YT--%d(%s)-- %s:%d slave-%d, val: %d error, %s" % (
-                                    for_write[pp], pp, self.host, self.port, self.slave, val, e))
+                for_write[pp], pp, self.host, self.port, self.slave, val, e))
 
     def intTupleToHexStr(self, tuple):
         rr = "";
@@ -239,9 +249,9 @@ if __name__ == '__main__':
     ae.poll_fault_recode()
 
     tagValList = [
-        {"tag":"SS#DD#MM#d02#u_fd_start", "val":"100"},
-        {"tag":"SS#DD#MM#d02#u_fd_thsd", "val":"1200"}
-                  ]
+        {"tag": "SS#DD#MM#d02#u_fd_start", "val": "100"},
+        {"tag": "SS#DD#MM#d02#u_fd_thsd", "val": "1200"}
+    ]
     ae.write_with_single(tagValList)
 
     # hr = HandleRedis.HandleRedis(host='127.0.0.1', port=6379)

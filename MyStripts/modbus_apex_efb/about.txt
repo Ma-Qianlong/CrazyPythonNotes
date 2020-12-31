@@ -5,7 +5,8 @@
     a. [EFB-*]是由1开始的
     b.参数“meter_no”的值，比必须小于等于[EFB-*]的数量
 
-2. 目前实时数据 及 故障录波数据 都存到redis中，后续逻辑由上层平台处理
+2. 目前实时数据存到redis中，后续逻辑由上层平台处理
+   故障录波数据存到MySQL中，数据表结构见：t_efb_fault_rec_data.sql 文件
 
 3. 指令下发接口（RESTful）, “127.0.0.1”即ip改成实际主机ip即可，header必须得加, 且tagname必须符合标准:
     url：  http://127.0.0.1:5000/writeTagVal

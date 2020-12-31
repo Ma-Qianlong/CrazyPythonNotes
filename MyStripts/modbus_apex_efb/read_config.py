@@ -65,6 +65,12 @@ class ReadConfig:
         else:
             return self.cf.items("REDIS")  # 获取section名为REDIS所对应的全部键值对
 
+    def get_mysql(self, param=None):
+        if param:
+            return self.cf.get("MYSQL", param)  # 获取[MYSQL]中<param>对应的值
+        else:
+            return self.cf.items("MYSQL")  # 获取section名为MYSQL所对应的全部键值对
+
 
 if __name__ == '__main__':
     test = ReadConfig()

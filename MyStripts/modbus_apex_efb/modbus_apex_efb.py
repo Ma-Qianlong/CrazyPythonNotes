@@ -10,8 +10,10 @@
 
 import threading
 import time
+from datetime import datetime
 from read_config import ReadConfig
 from handle_redis import HandleRedis
+from handle_mysql import doDbOpt
 from apex_efb import ModbusTCP_apex_efb as ApexEfb
 from mycolorlog import *
 
@@ -81,6 +83,7 @@ def find_last(string, str):
             return last_position
         last_position = position
 
+tagPrefix_fault_dict = {}
 
 def server_target(redis, efb, scan_interval):
     try:
@@ -93,15 +96,42 @@ def server_target(redis, efb, scan_interval):
             redis.putRTData(dd)
             logger.info("****** scan onece for %s:%d slave-%s finished, data size: %d" %
                         (efb.host, efb.port, efb.slave, len(dd)))
+            # global tagPrefix_fault_dict
+            # if tagPrefix_fault_dict.get(efb.tag_prefix) is None:
+            #     tagPrefix_fault_dict[efb.tag_prefix] = efb.has_fault
+            # # 产生了故障
+            # if efb.has_fault == 1 and tagPrefix_fault_dict.get(efb.tag_prefix) == 0:
+            #     # 故障产生时间
+            #     faultTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            #     # 故障设备
+            #     assetName = efb.tag_prefix.split("#")[3]
+            #     # 故障代码
+            #     faultCode = efb.fault_code
+            #     # 故障录波
+            #     recData = None
             if efb.fault_rec == 1 and efb.reading_rec is not True:
+                # 故障产生时间
+                faultTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                # 故障设备
+                assetName = efb.tag_prefix.split("#")[3]
+                # 故障代码
+                faultCode = efb.fault_code
+
                 ts = time.time()
                 logger.info("****** there has fault recode for %s:%d slave-%s to read" %
                             (efb.host, efb.port, efb.slave))
                 # threading.Thread(target=efb.poll_fault_recode, args=(redis,))
-                efb.poll_fault_recode(redis)
+                recData = efb.poll_fault_recode_toMysql()
                 logger.info("****** fault recode for %s:%d slave-%s read finished, cost time(s): %f" %
                             (efb.host, efb.port, efb.slave, (time.time() - ts)))
-
+                # 向mysql数据库保存故障事假及录波数据
+                # threading.Thread(target=inserRecToMysql, args=(assetName, faultCode, faultTime, efb.fault_rec, recData))
+                try:
+                    inserRecToMysql(assetName, faultCode, faultTime, efb.fault_rec, recData)
+                    # 下发录波数据已读取命令
+                    efb.set_fault_rec_readed()
+                except Exception as e:
+                    logger.error("****** Insert Rec To Mysql for %s:%d slave-%s ERROR, %s" % (efb.host, int(efb.port), efb.slave, e))
             time.sleep(scan_interval)
 
     except Exception as e:
@@ -109,7 +139,7 @@ def server_target(redis, efb, scan_interval):
 
 
 tagPrefix_efb_dict = {}
-
+mysql = None
 
 def do_start():
     logger.info("### read config info ... ")
@@ -123,8 +153,16 @@ def do_start():
     redis_dict = dict(redisCfg)
     logger.info(redis_dict)
 
+    mysqlCfg = cofig.get_mysql()
+    mysql_dict = dict(mysqlCfg)
+    logger.info(mysql_dict)
+
     # 设置日志级别
     logger.setLevel(base_dict.get("log_level"))
+
+    # mysql
+    global mysql
+    mysql = doDbOpt(mysql_dict.get('host'), int(mysql_dict.get("port")), mysql_dict.get("user"), mysql_dict.get("password"), mysql_dict.get("database"))
 
     logger.info("### start load %s meters threads ... " % base_dict.get('meter_no'))
     for i in range(int(base_dict.get('meter_no'))):
@@ -143,6 +181,14 @@ def do_start():
     # time.sleep(5)
     # print("&&&&&&&& " + str(tagPrefix_efb_dict.get("SS#DD#MM#d01#").online))
 
+def inserRecToMysql(assetName, faultCode, faultTime, faultRec=0, faultData=None):
+    global mysql
+    if mysql is None:
+        cofig = ReadConfig()
+        mysqlCfg = cofig.get_mysql()
+        mysql_dict = dict(mysqlCfg)
+        mysql = doDbOpt(mysql_dict.get('host'), int(mysql_dict.get("port")), mysql_dict.get("user"), mysql_dict.get("password"), mysql_dict.get("database"))
+    mysql.insertFaultRecData(assetName, faultCode, faultTime, faultRec, faultData)
 
 if __name__ == '__main__':
     do_start()

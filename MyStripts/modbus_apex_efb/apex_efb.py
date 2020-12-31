@@ -14,6 +14,7 @@ import modbus_tk.modbus_tcp as modbus_tcp
 import time
 from datetime import datetime
 from mycolorlog import *
+import json
 
 # 电气量参数， 30000+key 为寄存器地址
 dict_suffix = {1: 'fault', 3: 'u', 4: 'i', 5: 'p', 6: 'i_a_fd', 7: 'i_b_fd', 8: 'i_c_fd', 9: 'i_a_ct', 10: 'i_a_ct',
@@ -27,7 +28,7 @@ dict_suffix = {1: 'fault', 3: 'u', 4: 'i', 5: 'p', 6: 'i_a_fd', 7: 'i_b_fd', 8: 
                43: 'i_r_b_out', 44: 'i_r_c_out',
                72: 'elec_rect_rcnt', 75: 'fault_rec'}
 # 设备状态及运行模式(按位) 30027
-dict_suffix_27 = {0: 'status_off', 1: 'status_on', 2: 'fault', 3: 'status_offline', 4: 'status_em', 5: 'status_standby',
+dict_suffix_27 = {0: 'status_off', 1: 'status_on', 2: 'status_fault', 3: 'status_offline', 4: 'status_em', 5: 'status_standby',
                   8: 'mode_fd', 9: 'mode_svg', 10: 'mode_bidc', 11: 'mode_debug', 12: 'mode_rect', 13: 'mode_fd_prty',
                   14: 'mode_self_insp'}
 # 开关接触器状态(按位) 30027
@@ -67,6 +68,8 @@ class ModbusTCP_apex_efb:
         self.tag_prefix = tag_prefix
 
         self.online = False
+        self.has_fault = 0  # 是否有故障    -- 0无；1有
+        self.fault_code = 0  # 故障代码
         self.fault_rec = 0  # 是否有故障录波 30075	-- 0无；1有
         self.reading_rec = False  # 是否正在读取故障录波数据
 
@@ -96,6 +99,9 @@ class ModbusTCP_apex_efb:
             tt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             r_list = []
 
+            # 故障代码
+            self.fault_code = oneRes[1]
+
             # 总回馈电量
             r_list.append({'tag': self.tag_prefix + suffix_fd, 'val': (oneRes[20] << 8 + oneRes[21]), 'time': tt})
             # 总整流电量
@@ -107,12 +113,16 @@ class ModbusTCP_apex_efb:
             # 设备状态及运行模式(按位)
             b_27 = bin(oneRes[27])
             bit_list_27 = [0] * (18 - len(b_27)) + list(b_27[2:])
+            bit_list_27.reverse()  # 倒置
             for i in range(16):
                 if dict_suffix_27.get(i) is not None:
                     r_list.append({'tag': self.tag_prefix + dict_suffix_27[i], 'val': bit_list_27[i], 'time': tt})
+            # 是否有故障
+            self.has_fault = bit_list_27[2]
             # 开关接触器状态(按位)
             b_28 = bin(oneRes[28])
             bit_list_28 = [0] * (18 - len(b_28)) + list(b_28[2:])
+            bit_list_28.reverse()  # 倒置
             for i in range(16):
                 if dict_suffix_28.get(i) is not None:
                     r_list.append({'tag': self.tag_prefix + dict_suffix_28[i], 'val': bit_list_28[i], 'time': tt})
@@ -178,13 +188,51 @@ class ModbusTCP_apex_efb:
             if redis is not None:
                 redis.putFaultRecData(r_list)
             # 下发录波数据已读取命令
-            self.master.execute(self.slave, cst.WRITE_SINGLE_REGISTER, 40027, output_value=1)
-            logger.info("@@@@@@ --YT--%d(%s)-- %s:%d slave-%d, val: %d, OK" % (40027, 'rec_read', self.host, self.port, self.slave, 1))
-            self.reading_rec = False
-
+            self.set_fault_rec_readed()
             return r_list
         else:
             return None
+
+    def poll_fault_recode_toMysql(self):
+        """
+        读取故障录波数据
+        :return:
+        """
+        if self.online and self.master is not None:
+            self.reading_rec = True
+
+            r_dict = {}
+
+            quantity_of_x = 100
+            p_res = ()
+            for i in range(180):
+                starting_address = 10001 + i * 100
+                oneRes = self.master.execute(self.slave, cst.READ_INPUT_REGISTERS, starting_address, quantity_of_x,
+                                             data_format=">" + (quantity_of_x * "h"))
+                logger.debug("@@@@@@ --fault_recode-- %s:%d slave-%s, SA-%d, QX-%d, int-%s, hex-%s" % (
+                    self.host, self.port, self.slave, starting_address, quantity_of_x, str(oneRes),
+                    self.intTupleToHexStr(oneRes)))
+                p_res += oneRes
+                if i % 20 == 19:
+                    r_dict[self.tag_prefix + rec_params[i // 20]] = str(p_res)
+                    p_res = ()
+
+            logger.debug("@@@@@@ --fault_recode-- " + str(r_dict))
+
+            return json.dumps(r_dict)
+        else:
+            return None
+
+    def set_fault_rec_readed(self):
+        """
+        下发录波数据已读取命令
+        :return:
+        """
+        # 下发录波数据已读取命令
+        self.master.execute(self.slave, cst.WRITE_SINGLE_REGISTER, 40027, output_value=1)
+        logger.info("@@@@@@ --YT--%d(%s)-- %s:%d slave-%d, val: %d, OK" % (
+            40027, 'rec_read', self.host, self.port, self.slave, 1))
+        self.reading_rec = False
 
     def poll_and_analysis(self):
         rr = []
@@ -195,7 +243,7 @@ class ModbusTCP_apex_efb:
         except Exception as e:
             logger.error(
                 "@@@@@@ --poll_and_analysis--READ_INPUT_REGISTERS(04), 30000, 76 for %s:%d slave-%s ERROR, %s" % (
-                self.host, int(self.port), self.slave, e))
+                    self.host, int(self.port), self.slave, e))
         try:
             yc03 = self.poll_yc_03()
             if yc03 is not None:

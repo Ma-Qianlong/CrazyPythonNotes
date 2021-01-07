@@ -31,7 +31,7 @@ dict_suffix = {1: 'fault', 3: 'u', 4: 'i', 5: 'p', 6: 'i_a_fd', 7: 'i_b_fd', 8: 
 dict_suffix_27 = {0: 'status_off', 1: 'status_on', 2: 'status_fault', 3: 'status_offline', 4: 'status_em', 5: 'status_standby',
                   8: 'mode_fd', 9: 'mode_svg', 10: 'mode_bidc', 11: 'mode_debug', 12: 'mode_rect', 13: 'mode_fd_prty',
                   14: 'mode_self_insp'}
-# 开关接触器状态(按位) 30027
+# 开关接触器状态(按位) 30028
 dict_suffix_28 = {0: 'status_dc', 1: 'status_ac', 2: 'status_dscn', 3: 'status_km1', 4: 'status_breaker_a',
                   5: 'status_breaker_b', 6: 'status_breaker_c'}
 # 总回馈电量 30020,30021（高16位，低16位）
@@ -290,17 +290,31 @@ if __name__ == '__main__':
     # ae = ModbusTCP_apex_efb(host="127.0.0.1", tag_prefix="SS#DD#MM#d01#")
     ae.to_connect()
 
-    ae.poll_yc_04()
+    while True:
+        ae.poll_yc_04()
+        print("--------------")
+        time.sleep(1)
 
-    ae.poll_yc_03()
+    # b_27 = bin(2052)
+    # print(b_27)
+    # bit_list_27 = [0] * (18 - len(b_27)) + list(b_27[2:])
+    # print(bit_list_27)
+    # bit_list_27.reverse()  # 倒置
+    # print("################################")
+    # print(bit_list_27)
+    # print("################################")
 
-    ae.poll_fault_recode()
-
-    tagValList = [
-        {"tag": "SS#DD#MM#d02#u_fd_start", "val": "100"},
-        {"tag": "SS#DD#MM#d02#u_fd_thsd", "val": "1200"}
-    ]
-    ae.write_with_single(tagValList)
+    # ae.poll_yc_04()
+    #
+    # ae.poll_yc_03()
+    #
+    # ae.poll_fault_recode()
+    #
+    # tagValList = [
+    #     {"tag": "SS#DD#MM#d02#u_fd_start", "val": "100"},
+    #     {"tag": "SS#DD#MM#d02#u_fd_thsd", "val": "1200"}
+    # ]
+    # ae.write_with_single(tagValList)
 
     # hr = HandleRedis.HandleRedis(host='127.0.0.1', port=6379)
     # while True:

@@ -44,3 +44,5 @@ if __name__ == '__main__':
             file_object.write(one + '\n')
 
     print("执行结束。")
+
+# pyinstaller -F -c FindFileSize.py -n filename@size(byte)

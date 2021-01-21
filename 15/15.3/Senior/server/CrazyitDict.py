@@ -9,7 +9,7 @@
 
 class CrazyitDict(dict):
     # 根据value查找key
-    def key_form_value(self, val):
+    def key_from_value(self, val):
         # 遍历所有key组成的集合
         for key in self.keys():
             # 如果指定 key 对应的 value 与被搜索的 value 相同，则返回对应的 key

@@ -187,3 +187,37 @@ CrazyitProtocol 程序 ，该程序专 门用于定义协议字符。
                 \Senior\client\Client.py
 
 ## 15.3.6 半关闭的 socket
+    前面在介绍服务器端和客户端通信时，总是以一个 bytes 对象作为通信的最小数据单位的，服
+务器端在处理信息时也是针对每个 bytes 进行的。在一些协议中，通信的数据单位可能需要多个
+bytes 对象 在这种情况下，就需要解决一个问题 ： socket 如何表示输出数据已经结束？
+    如果要表示输出数据己经结束，则可以通过关闭 socket 来实现。但如果彻底关闭了 socket，则
+会导致程序无法再从该 socket 中读取数据。
+    在这种情况下， socket 提供了 一个 shutdown(how）关闭方法， 该方法可以只关闭 socket 的输入
+或输出部分，用以表示输出数据已经发送完成。该方法的 how 参数接受如下参数值。
+    > SHUT_RD ： 关闭 socket 的输入部分，程序还可通过该 socket 输出 数据。
+    > SHUT_WR ： 关闭该 socket 的输出部分，程序还可通过该 socket 读取数据。
+    > SHUT_RDWR ： 全关闭。该 socket 既不能读取数据，也不能写入数据。
+    当调用 shutdown() 方法关闭 socket 的输入或输出部分之后，该 socket 处于“半关闭”状态。
+
+    $$提示$$
+    即使一个 socket 实例在调用 shutdown() 方法制传入了 SHUT_RDWR 参数，该 socket
+也依然没有被彻底清理 （与 close() 方法不同），只是该 socket 既不能输出数据，也不能读取数据了。
+
+        HalfClose\server.py
+
+## 15.3.7 selectors 模块
+    通过 selectors 模块允许 socket 以非阻塞方式进行通信 ： selectors 相 当于一个事件注册中心， 程
+序只要将 socket 的所有事件注册给 selectors 管理，当 selectors 检测到 socket 中的特定事件之后，
+程序就调用相应的监昕方法进行处理 。
+selectors 主要支持两种事件 。
+    > selectors.EVENT_READ：当 socket 有数据可读时触发该事件。当有客户端连接进来时也会触发该事件。
+    > selectors.EVENT_WRITE：当 socket 将要写数据时触发该事件。
+    使用 se lectors 实现非阻塞式编程的步骤大致如下。
+    1. 创建 selectors 对象。
+    2. 通过 selectors 对象为 socket 的 selectors.EVENT_READ 或 selectors.EVENT_WRITE 事件注
+册监听器函数。每当 socket 有数据需要读写时，系统负责触发所注册的监昕器函数。
+    3. 在监昕器函数中处理 socket 通信。
+
+            \noblock\server.py (使用 selectors 模块实现非阻塞式通信的服务器端。)
+            \noblock\client.py (客户端程序 。 i哀客户端程序更加简单一一客户端程序只需要读取 socket 中的
+数据，因此只要使用 selectors 为 socket 注册“有数据可读”事件的监听函数即可 。)

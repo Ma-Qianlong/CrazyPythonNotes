@@ -15,9 +15,15 @@ import threading
 s = socket.socket()
 # 连接远程服务器
 s.connect(('127.0.0.1', 30000))
+s.setblocking(True)
 def read_from_server(s):
+    print("!!!!!!!!!!!!!!!")
     while True:
-        print(s.recv(2048).decode('utf-8'))
+        # print(1111111111111)
+        line = s.recv(2048).decode('utf-8')
+        if len(line) > 0:
+            # print(2222222222222)
+            print(line)
 # 客户端启动线程不断的读取来自服务器端的数据
 threading.Thread(target=read_from_server, args=(s, )).start() # ①
 while True:
